@@ -95,14 +95,19 @@ This front-end application would access to (CORS-enabled)CouchDB/Cloudant with R
 
 - APIs for attached file(s)
   - document have to be created before following APIs
-  - Add/Update file into document
+  - Create/Update file into document
     - `var r = await cdb.updateFile( 'db', 'doc_id', 'selector' );` or
     - `cdb.updateFile( 'db', 'doc_id', 'selector' ).then( function( r ){`
     - `  :`
     - `});`
+  - Read file from document
+    - `var r = await cdb.readFile( 'db', 'doc_id', 'filename' );` or
+    - `cdb.readFile( 'db', 'doc_id', 'filename' ).then( function( r ){`
+    - `  :`
+    - `});`
   - Delete file from document
-    - `var r = await cdb.deleteFile( 'db', 'doc_id', 'selector' );` or
-    - `cdb.deleteFile( 'db', 'doc_id', 'selector' ).then( function( r ){`
+    - `var r = await cdb.deleteFile( 'db', 'doc_id', 'filename' );` or
+    - `cdb.deleteFile( 'db', 'doc_id', 'filename' ).then( function( r ){`
     - `  :`
     - `});`
 

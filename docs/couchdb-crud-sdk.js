@@ -126,7 +126,7 @@ class CouchDB_CRUD_SDK{
     return new Promise( async ( resolve, reject ) => {
       var r = null;
       try{
-        var result = await fetch( this.base_url + '/' + db + '/' + doc_id /* + '?include_docs=true'*/, {
+        var result = await fetch( this.base_url + '/' + db + '/' + doc_id, {
           headers: {
             'Authorization': 'Basic ' + this.base64,
             'Content-Type': 'application/json' 
@@ -331,27 +331,55 @@ class CouchDB_CRUD_SDK{
     });
   }
 
+  //. #1 get _attachments
+  readFile = async function( db, doc_id, filename ){
+    return new Promise( async ( resolve, reject ) => {
+      var self = this;
+      var r = null;
+      try{
+        var result = await fetch( this.base_url + '/' + db + '/' + doc_id + '?attachments=true', {
+          headers: {
+            'Authorization': 'Basic ' + this.base64,
+            'Content-Type': 'application/json' 
+          }
+        });
+        var json = await result.json();  //. { _id: 'xxx', _rev: 'yyy', _attachments: { 'filename1': { .. }, .. } }
+        if( json && json._attachments && json._attachments[filename] ){
+          r = { status: true, result: json._attachments[filename] };  //. { content_type: 'image/png', data: 'base64data', .. }
+        }else{
+          r = { status: false, error: 'no attached file found for name = ' + filename };
+        }
+        r = { status: true, result: json };
+      }catch( e ){
+        r = { status: false, error: e };
+        console.log( e );
+      }
+
+      resolve( r );
+    });
+  }
+
   //. #1 delete _attachments
-  deleteFile = async function( db, doc_id, name ){
+  deleteFile = async function( db, doc_id, filename ){
     return new Promise( async ( resolve, reject ) => {
       var self = this;
       var r = null;
       try{
         r = await self.readDoc( db, doc_id );
         if( r && r.status ){
-          if( name ){
+          if( filename ){
             var doc = r.result;
-            if( doc._attachments && doc._attachments[name] ){
+            if( doc._attachments && doc._attachments[filename] ){
               delete doc._attachments[name];
   
               r = await self.updateDoc( db, doc_id, doc );
               resolve( r );
             }else{
-              r = { status: false, error: 'no attachment for name = ' + name };
+              r = { status: false, error: 'no attachment for name = ' + filename };
               resolve( r );
             }
           }else{
-            r = { status: false, error: 'attachment name has something wrong.' };
+            r = { status: false, error: 'no filename specified.' };
             resolve( r );
           }
         }else{
