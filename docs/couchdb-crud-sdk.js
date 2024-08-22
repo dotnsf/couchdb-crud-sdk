@@ -126,7 +126,7 @@ class CouchDB_CRUD_SDK{
     return new Promise( async ( resolve, reject ) => {
       var r = null;
       try{
-        var result = await fetch( this.base_url + '/' + db + '/' + doc_id, {
+        var result = await fetch( this.base_url + '/' + db + '/' + doc_id /* + '?include_docs=true'*/, {
           headers: {
             'Authorization': 'Basic ' + this.base64,
             'Content-Type': 'application/json' 
@@ -257,6 +257,112 @@ class CouchDB_CRUD_SDK{
       }
 
       resolve( r );
+    });
+  }
+
+
+  //. #1 add/update _attachments
+  updateFile = async function( db, doc_id, selector ){
+    return new Promise( async ( resolve, reject ) => {
+      var self = this;
+      var r = null;
+      try{
+        r = await self.readDoc( db, doc_id );
+        if( r && r.status ){
+          if( selector ){
+            var file = document.querySelector( selector ).files[0];
+            var name = file.name;
+            var doc = r.result;
+            if( doc ){
+              var reader = new FileReader();
+              reader.addEventListener( 'load', function( e ){
+                //console.log( reader.result );  //. data:image/png;base64,xxxxxxx..
+                var data = reader.result;
+                var tmp = data.split( ',' );
+                if( tmp.length == 2 ){
+                  var base64 = tmp[1];
+                  data = tmp[0];
+                  tmp = data.split( ';' );
+                  if( tmp.length == 2 ){
+                    data = tmp[0];
+                    tmp = data.split( ':' );
+                    if( tmp.length == 2 ){
+                      if( !doc._attachments ){
+                        doc._attachments = {};
+                      }
+                      doc._attachments[name] = {};
+                      doc._attachments[name].content_type = tmp[1];
+                      doc._attachments[name].data = base64;
+  
+                      self.updateDoc( db, doc_id, doc ).then( function( r ){
+                        resolve( r );
+                      });
+                    }else{
+                      r = { status: false, error: 'file data(format) would be something wrong.' };
+                      resolve( r );
+                    }
+                  }else{
+                    r = { status: false, error: 'file data(format) would be something wrong.' };
+                    resolve( r );
+                  }
+                }else{
+                  r = { status: false, error: 'file data(format) would be something wrong.' };
+                  resolve( r );
+                }
+              });
+              reader.readAsDataURL( file );
+            }else{
+              r = { status: false, error: 'no document found for _id = ' + doc_id };
+              resolve( r );
+            }
+          }else{
+            r = { status: false, error: 'no selector specified.' };
+            resolve( r );
+          }
+        }else{
+          r = { status: false, error: r.error };
+          resolve( r );
+        }
+      }catch( e ){
+        r = { status: false, error: e };
+        console.log( e );
+        resolve( r );
+      }
+    });
+  }
+
+  //. #1 delete _attachments
+  deleteFile = async function( db, doc_id, name ){
+    return new Promise( async ( resolve, reject ) => {
+      var self = this;
+      var r = null;
+      try{
+        r = await self.readDoc( db, doc_id );
+        if( r && r.status ){
+          if( name ){
+            var doc = r.result;
+            if( doc._attachments && doc._attachments[name] ){
+              delete doc._attachments[name];
+  
+              r = await self.updateDoc( db, doc_id, doc );
+              resolve( r );
+            }else{
+              r = { status: false, error: 'no attachment for name = ' + name };
+              resolve( r );
+            }
+          }else{
+            r = { status: false, error: 'attachment name has something wrong.' };
+            resolve( r );
+          }
+        }else{
+          r = { status: false, error: r.error };
+          resolve( r );
+        }
+      }catch( e ){
+        r = { status: false, error: e };
+        console.log( e );
+        resolve( r );
+      }
     });
   }
 }

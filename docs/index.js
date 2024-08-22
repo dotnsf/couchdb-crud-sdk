@@ -137,7 +137,7 @@ function save_doc(){
       get_docs( tmp[0] );
     });
   }else if( tmp.length == 3 && tmp[2] == "updateDoc" ){
-    cdb.updateDoc( tmp[0], tmp[1], doc_json ).then( function( doc ){
+    cdb.updateDoc( tmp[0], tmp[1], doc_json ).then( function( r ){
       $('#editModal').modal( 'hide' );
       get_docs( tmp[0] );
     });

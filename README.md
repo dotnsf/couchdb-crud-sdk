@@ -93,6 +93,19 @@ This front-end application would access to (CORS-enabled)CouchDB/Cloudant with R
     - `  :`
     - `});`
 
+- APIs for attached file(s)
+  - document have to be created before following APIs
+  - Add/Update file into document
+    - `var r = await cdb.updateFile( 'db', 'doc_id', 'selector' );` or
+    - `cdb.updateFile( 'db', 'doc_id', 'selector' ).then( function( r ){`
+    - `  :`
+    - `});`
+  - Delete file from document
+    - `var r = await cdb.deleteFile( 'db', 'doc_id', 'selector' );` or
+    - `cdb.deleteFile( 'db', 'doc_id', 'selector' ).then( function( r ){`
+    - `  :`
+    - `});`
+
 
 ## Returned value
 
@@ -111,6 +124,14 @@ This front-end application would access to (CORS-enabled)CouchDB/Cloudant with R
 
 [Sample web application](https://dotnsf.github.io/couchdb-crud-sdk/)
 
+
+## References
+
+- Apache CouchDB API Refernece
+  - https://docs.couchdb.org/en/stable/api/index.html
+  
+- JavaScriptのメソッドで自身のクラスの他のメソッドを呼び出したい
+  - https://sierra-kilo.hatenablog.jp/entry/2016/10/26/235959
 
 ## Licensing
 
