@@ -4,7 +4,7 @@ function login(){
   var password = $('#db_password').val();
   var base_url = $('#db_base_url').val();
 
-  cdb = new CouchDB_Viewer( username, password, base_url );
+  cdb = new CouchDB_CRUD_SDK( username, password, base_url );
 
   cdb.readAllDbs().then( function( r ){
     if( r && r.status ){
