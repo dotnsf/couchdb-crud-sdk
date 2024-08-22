@@ -122,11 +122,17 @@ class CouchDB_CRUD_SDK{
     });
   }
 
-  readDoc = async function( db, doc_id ){
+  //. #2
+  readDoc = async function( db, doc_id, doc_rev ){
     return new Promise( async ( resolve, reject ) => {
       var r = null;
       try{
-        var result = await fetch( this.base_url + '/' + db + '/' + doc_id, {
+        var url = this.base_url + '/' + db + '/' + doc_id;
+        if( doc_rev ){
+          url += '?rev=' + doc_rev;
+        }
+
+        var result = await fetch( url, {
           headers: {
             'Authorization': 'Basic ' + this.base64,
             'Content-Type': 'application/json' 
@@ -143,7 +149,7 @@ class CouchDB_CRUD_SDK{
     });
   }
 
-  readAllDocs( db ){
+  readAllDocs = async function( db ){
     return new Promise( async ( resolve, reject ) => {
       var r = null;
       try{
@@ -188,6 +194,36 @@ class CouchDB_CRUD_SDK{
       }
 
       resolve( r );  
+    });
+  }
+
+  //. #2
+  readAllRevisions = async function( db, doc_id ){
+    return new Promise( async ( resolve, reject ) => {
+      var r = null;
+      try{
+        var result = await fetch( this.base_url + '/' + db + '/' + doc_id + '?revs=true', {
+          headers: {
+            'Authorization': 'Basic ' + this.base64,
+            'Content-Type': 'application/json' 
+          }
+        });
+        var json = await result.json();  //. { _id: 'xxx', _rev: 'yyy', _revisions: { ids: [ .. ], .. }, .. }
+        if( json && json._revisions && json._revisions['ids'] ){
+          var ids = json._revisions['ids'];
+          for( var i = 0; i < ids.length; i ++ ){
+            ids[i] = ( ids.length - i ) + '-' + ids[i];
+          }
+          r = { status: true, result: ids };
+        }else{
+          r = { status: false, error: e };
+        }
+      }catch( e ){
+        r = { status: false, error: e };
+        console.log( e );
+      }
+
+      resolve( r );
     });
   }
 

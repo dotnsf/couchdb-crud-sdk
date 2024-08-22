@@ -77,6 +77,11 @@ This front-end application would access to (CORS-enabled)CouchDB/Cloudant with R
     - `cdb.readAllDesignDocs( 'db' ).then( function( r ){`
     - `  :`
     - `});`
+  - Read all document revisions
+    - `var r = await cdb.readAllRevisions( 'db', 'doc_id' );` or
+    - `cdb.readAllRevisions( 'db', 'doc_id' ).then( function( r ){`
+    - `  :`
+    - `});`
   - Search documents
     - `var r = await cdb.searchDocs( 'db', { selector: { type: { '$eq': 'type-0' } }, fields: [ '_id', '_rev', 'name', 'type' ] } );` or
     - `cdb.searchDocs( 'db', { selector: { type: { '$eq': 'type-0' } }, fields: [ '_id', '_rev', 'name', 'type' ] } ).then( function( r ){`
