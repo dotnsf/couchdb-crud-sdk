@@ -122,6 +122,29 @@ class CouchDB_CRUD_SDK{
     });
   }
 
+  //. #4 bulk insert/update
+  updateDocs = async function( db, docs ){
+    return new Promise( async ( resolve, reject ) => {
+      var r = null;
+      try{
+        var result = await fetch( this.base_url + '/' + db + '/_bulk_docs', {
+          method: 'POST',
+          body: JSON.stringify( { docs: docs } ),
+          headers: {
+            'Authorization': 'Basic ' + this.base64,
+            'Content-Type': 'application/json' 
+          }
+        });
+        var json = await result.json();
+        r = { status: true, result: json };
+      }catch( e ){
+        r = { status: false, error: e };
+        console.log( e );
+      }
+      resolve( r );
+    });
+  }
+
   //. #2
   readDoc = async function( db, doc_id, doc_rev ){
     return new Promise( async ( resolve, reject ) => {
