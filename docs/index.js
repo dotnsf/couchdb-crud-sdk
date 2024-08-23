@@ -42,7 +42,7 @@ async function create_db(){
 
 async function delete_db( db ){
   if( confirm( 'データベース: '+ db + 'を本当に削除しますか？' ) ){
-    var r = await __base_obj.deleteDb( db );  //. { ok: true }
+    var r = await cdb.deleteDb( db );  //. { ok: true }
     if( r && r.status ){
       $('#dbs_list').html( '' );
       $('#docs_list').html( '' );
