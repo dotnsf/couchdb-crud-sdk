@@ -122,8 +122,45 @@ class CouchDB_CRUD_SDK{
     });
   }
 
+  //. #3 create/update design docucment
+  saveDesignDoc = async function( db, design_name, design_doc ){
+    return new Promise( async ( resolve, reject ) => {
+      var self = this;
+      var r = null;
+      try{
+        var doc_id = '_design/' + design_name;
+        var url = this.base_url + '/' + db + '/' + doc_id;
+        r = await self.readDoc( db, doc_id );
+        if( r && r.status ){
+          //. update
+          var doc = r.result;
+          design_doc._rev = doc._rev;
+          url += '?rev=' + doc._rev;
+        }else{
+          //. create
+          design_doc._id = doc_id;
+        }
+
+        var result = await fetch( url, {
+          method: 'PUT',
+          body: JSON.stringify( design_doc ),
+          headers: {
+            'Authorization': 'Basic ' + this.base64,
+            'Content-Type': 'application/json' 
+          }
+        });
+        var json = await result.json();
+        r = { status: true, result: json };
+      }catch( e ){
+        r = { status: false, error: e };
+        console.log( e );
+      }
+      resolve( r );
+    });
+  }
+
   //. #4 bulk insert/update
-  updateDocs = async function( db, docs ){
+  saveDocs = async function( db, docs ){
     return new Promise( async ( resolve, reject ) => {
       var r = null;
       try{
@@ -187,6 +224,22 @@ class CouchDB_CRUD_SDK{
           docs.push( json.rows[i].doc );
         }
         r = { status: true, result: docs };
+      }catch( e ){
+        r = { status: false, error: e };
+        console.log( e );
+      }
+
+      resolve( r );
+    });
+  }
+
+  readDesignDoc = async function( db, design_name ){
+    return new Promise( async ( resolve, reject ) => {
+      var self = this;
+      var r = null;
+      try{
+        var doc_id = '_design/' + design_name;
+        r = await self.readDoc( db, doc_id );
       }catch( e ){
         r = { status: false, error: e };
         console.log( e );
@@ -319,9 +372,25 @@ class CouchDB_CRUD_SDK{
     });
   }
 
+  deleteDesignDoc = async function( db, design_name ){
+    return new Promise( async ( resolve, reject ) => {
+      var self = this;
+      var r = null;
+      try{
+        var doc_id = '_design/' + design_name;
+        r = await self.deleteDoc( db, doc_id );
+      }catch( e ){
+        r = { status: false, error: e };
+        console.log( e );
+      }
+
+      resolve( r );
+    });
+  }
+
 
   //. #1 add/update _attachments
-  updateFile = async function( db, doc_id, selector ){
+  saveFile = async function( db, doc_id, selector ){
     return new Promise( async ( resolve, reject ) => {
       var self = this;
       var r = null;

@@ -63,8 +63,8 @@ This front-end application would access to (CORS-enabled)CouchDB/Cloudant with R
     - `  :`
     - `});`
   - Create/Update documents
-    - `var r = await cdb.updateDocs( 'db', [ { name: 'name01', price: 100 }, .. ] );` or
-    - `cdb.updateDocs( 'db', [ { name: 'name01', price: 100 }, .. ] ).then( function( r ){`
+    - `var r = await cdb.saveDocs( 'db', [ { name: 'name01', price: 100 }, .. ] );` or
+    - `cdb.saveDocs( 'db', [ { name: 'name01', price: 100 }, .. ] ).then( function( r ){`
     - `  :`
     - `});`
   - Read document
@@ -75,11 +75,6 @@ This front-end application would access to (CORS-enabled)CouchDB/Cloudant with R
   - Read all documents
     - `var r = await cdb.readAllDocs( 'db' );` or
     - `cdb.readAllDocs( 'db' ).then( function( r ){`
-    - `  :`
-    - `});`
-  - Read all design documents
-    - `var r = await cdb.readAllDesignDocs( 'db' );` or
-    - `cdb.readAllDesignDocs( 'db' ).then( function( r ){`
     - `  :`
     - `});`
   - Read all document revisions
@@ -103,11 +98,53 @@ This front-end application would access to (CORS-enabled)CouchDB/Cloudant with R
     - `  :`
     - `});`
 
+- APIs for design document
+  - Create/Update design document
+    - `var r = await cdb.saveDesignDoc( 'db', 'design_name', design_doc );` or
+    - `cdb.saveDesignDoc( 'db', 'design_name', design_doc ).then( function( r ){`
+    - `  :`
+    - `});`
+    - `design_doc` should be formed like followings:
+
+```(design_doc)
+design_doc = {
+  language: "javascript",
+  views: {
+    design_name: {
+      map: "function(doc){ if( doc.type == 'item' ){ emit( doc._id, {name:doc.name,price:doc.price} ); } }"
+    }
+  },
+  lists: {
+    design_name: "function(head,row){ start( { 'headers': { 'content-type': 'text/html; charset=utf-8' } } ); send( '<!DOCTYPE html><html><head><script src=\"https://code.jquery.com/jquery-2.2.4.min.js\"></script></head><body><h1>Items</h1><table border=\"1\"><tr><th>name</th><th>price</th></tr>' ); var row; while( row = getRow() ){  var url = '../../_show/design_name/';  send( ' <tr data-href=\"' + url + row.id + '\"><td><a href=\"' + url + row.id + '\">' + row.value.name + '</a></td><td><a href=\"' + url + row.id + '\">' + row.value.price + '</a></td></tr>' ); } send( '</table></html>' );}"
+  },
+  shows: {
+    design_name: "(function(doc,req){ if( doc ){ start( {'headers':{'content-type':'text/html; charset=utf-8'}} ); var str = '<!DOCTYPE html><html><head><script src=\"https://code.jquery.com/jquery-2.2.4.min.js\"></script></head><body><h2>' + doc.name + '</h2><h3>' + doc.price + '</h3></body></html>'; return str; }else{ return 'empty'; }})"
+  }
+}
+```
+
+  - Read design document
+    - `var r = await cdb.readDesignDoc( 'db', 'design_name' );` or
+    - `cdb.readDesignDoc( 'db', 'design_name' ).then( function( r ){`
+    - `  :`
+    - `});`
+  - Read all design documents
+    - `var r = await cdb.readAllDesignDocs( 'db' );` or
+    - `cdb.readAllDesignDocs( 'db' ).then( function( r ){`
+    - `  :`
+    - `});`
+  - Delete design document
+    - `var r = await cdb.deleteDesignDoc( 'db', 'design_name' );` or
+    - `cdb.deleteDesignDoc( 'db', 'design_name' ).then( function( r ){`
+    - `  :`
+    - `});`
+
+
 - APIs for attached file(s)
   - document have to be created before following APIs
   - Create/Update file into document
-    - `var r = await cdb.updateFile( 'db', 'doc_id', 'selector' );` or
-    - `cdb.updateFile( 'db', 'doc_id', 'selector' ).then( function( r ){`
+    - `var r = await cdb.saveFile( 'db', 'doc_id', 'selector' );` or
+    - `cdb.saveFile( 'db', 'doc_id', 'selector' ).then( function( r ){`
     - `  :`
     - `});`
   - Read file from document
