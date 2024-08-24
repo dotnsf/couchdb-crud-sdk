@@ -100,7 +100,7 @@ async function get_doc( db, doc_id ){
   if( r && r.status ){
     var doc = r.result;
     var body = '<pre>'
-      + JSON.stringify( doc, null, 2 )
+      + cdb.sanitize( JSON.stringify( doc, null, 2 ) )
       + '</pre>';
     $('#docModalLabel').html( db + ' - ' + doc_id + ' - readDoc' );
     $('#docmodal-body').html( body );
@@ -146,37 +146,4 @@ function save_doc(){
       get_docs( tmp[0] );
     });
   }
-}
-
-async function decodeDoc( selector ){
-  return new Promise( async ( resolve, reject ) => {
-    var r = null;
-    var file = document.querySelector( selector ).files[0];
-    var name = file.name;
-  
-    var reader = new FileReader();
-    reader.addEventListener( 'load', function( e ){
-      //console.log( reader.result );  //. data:application/json;base64,xxxxx...
-      var data = reader.result;
-      var tmp = data.split( ',' );
-      if( tmp.length == 2 ){
-        var base64 = tmp[1];
-        var sample_doc_string = decodeURIComponent( atob( base64 ) );
-        try{
-          var sample_doc = JSON.parse( sample_doc_string );
-          console.log( {sample_doc} );
-          r = { status: false, result: { name: name, doc: sample_doc } };
-        }catch( e ){
-          console.log( {e} );
-          r = { status: false, error: e };
-        }
-
-      }else{
-        console.log( 'wrong file format' );
-        r = { status: false, error: 'wrong file format' };
-      }
-      resolve( r );
-    });
-    reader.readAsDataURL( file );
-  });
 }

@@ -11,6 +11,16 @@ class CouchDB_CRUD_SDK{
     }
   }
 
+  //. sanitize
+  sanitize = function( text ){
+    text = text.split( '&' ).join( '&amp;' );
+    text = text.split( '<' ).join( '&lt;' );
+    text = text.split( '>' ).join( '&gt;' );
+    text = text.split( '"' ).join( '&quot;' );
+    text = text.split( "'" ).join( '&#039;' );
+
+    return text;
+  }
 
   //. Login
   login = async function( db ){
