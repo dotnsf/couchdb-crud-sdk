@@ -157,6 +157,11 @@ design_doc = {
     - `cdb.deleteFile( 'db', 'doc_id', 'filename' ).then( function( r ){`
     - `  :`
     - `});`
+  - Just Read attached Text file
+    - `var r = await cdb.readTextLocalFile( 'selector', 'utf-8' );` or
+    - `cdb.readTextLocalFile( 'selector', 'utf-8' ).then( function( r ){`
+    - `  :`
+    - `});`
 
 
 ## Returned value

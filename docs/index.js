@@ -1,5 +1,5 @@
 var cdb = null;
-function login(){
+function login( no_ui ){
   var username = $('#db_username').val();
   var password = $('#db_password').val();
   var base_url = $('#db_base_url').val();
@@ -13,16 +13,20 @@ function login(){
       if( dbs.length >= 0 ){
         $('.db_login').prop( 'disabled', true );
 
-        var dbs_list = '<table class="table">'
-          + '<tr><th><button class="btn btn-primary" onClick="create_db()">Create DB</button></th></tr>';
-        for( var i = 0; i < dbs.length; i ++ ){
-          dbs_list += '<tr><td class="dbname dbname-' + dbs[i] + '"><a href="#" onClick="get_docs(\'' + dbs[i] + '\')">' + dbs[i] + '</a></td></tr>';
+        if( !no_ui ){
+          var dbs_list = '<table class="table">'
+            + '<tr><th><button class="btn btn-primary" onClick="create_db()">Create DB</button></th></tr>';
+          for( var i = 0; i < dbs.length; i ++ ){
+            dbs_list += '<tr><td class="dbname dbname-' + dbs[i] + '"><a href="#" onClick="get_docs(\'' + dbs[i] + '\')">' + dbs[i] + '</a></td></tr>';
+          }
+          dbs_list += '</table>';
+          $('#dbs_list').html( dbs_list );
         }
-        dbs_list += '</table>';
-        $('#dbs_list').html( dbs_list );
       }
     }else{
+      if( !no_ui ){
         $('#dbs_list').html( '' );
+      }
     }
   });
 }
@@ -142,4 +146,37 @@ function save_doc(){
       get_docs( tmp[0] );
     });
   }
+}
+
+async function decodeDoc( selector ){
+  return new Promise( async ( resolve, reject ) => {
+    var r = null;
+    var file = document.querySelector( selector ).files[0];
+    var name = file.name;
+  
+    var reader = new FileReader();
+    reader.addEventListener( 'load', function( e ){
+      //console.log( reader.result );  //. data:application/json;base64,xxxxx...
+      var data = reader.result;
+      var tmp = data.split( ',' );
+      if( tmp.length == 2 ){
+        var base64 = tmp[1];
+        var sample_doc_string = decodeURIComponent( atob( base64 ) );
+        try{
+          var sample_doc = JSON.parse( sample_doc_string );
+          console.log( {sample_doc} );
+          r = { status: false, result: { name: name, doc: sample_doc } };
+        }catch( e ){
+          console.log( {e} );
+          r = { status: false, error: e };
+        }
+
+      }else{
+        console.log( 'wrong file format' );
+        r = { status: false, error: 'wrong file format' };
+      }
+      resolve( r );
+    });
+    reader.readAsDataURL( file );
+  });
 }
