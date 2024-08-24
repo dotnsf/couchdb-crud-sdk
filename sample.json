@@ -1,0 +1,19 @@
+{
+  "docs": [
+    { "type": "item", "name": "シャンプー", "price": 1000 },
+    { "type": "item", "name": "ボディソープ", "price": 1200 },
+    { "type": "item", "name": "リンス", "price": 800 },
+    { "type": "item", "name": "シェービングフォーム", "price": 500 }
+  ],
+  "views": {
+    "mydesign": {
+      "map": "function(doc){ if( doc.type == 'item' ){ emit( doc._id, {name:doc.name,price:doc.price} ); } }"
+    }
+  },
+  "lists": {
+    "mydesign": "function(head,row){ start( { 'headers': { 'content-type': 'text/html; charset=utf-8' } } ); send( '<!DOCTYPE html><html><head><title>List</title></head><body><h1>Items</h1><table border=\"1\"><tr><th>name</th><th>price</th></tr>' ); var row; while( row = getRow() ){  var url = '../../_show/mydesign/';  send( ' <tr data-href=\"' + url + row.id + '\"><td><a href=\"' + url + row.id + '\">' + row.value.name + '</a></td><td><a href=\"' + url + row.id + '\">' + row.value.price + '</a></td></tr>' ); } send( '</table></html>' );}"
+  },
+  "shows": {
+    "mydesign": "(function(doc,req){ if( doc ){ start( {'headers':{'content-type':'text/html; charset=utf-8'}} ); var str = '<!DOCTYPE html><html><head><title>' + doc.name + '</title></head><body><h2>' + doc.name + '</h2><h3>' + doc.price + '</h3></body></html>'; return str; }else{ return 'empty'; }})"
+  }
+}

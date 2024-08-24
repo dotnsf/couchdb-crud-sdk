@@ -105,6 +105,9 @@ This front-end application would access to (CORS-enabled)CouchDB/Cloudant with R
     - `  :`
     - `});`
     - `design_doc` should be formed like followings:
+      - After created design document with this sample, you can browse (with basic authentication) ..
+        - `https://(base_url)/(db)/_design/design_name/_list/design_name/design_name` for doc list
+        - `https://(base_url)/(db)/_design/design_name/_show/design_name/(_id)` for doc
 
 ```(design_doc)
 design_doc = {
@@ -115,10 +118,10 @@ design_doc = {
     }
   },
   lists: {
-    design_name: "function(head,row){ start( { 'headers': { 'content-type': 'text/html; charset=utf-8' } } ); send( '<!DOCTYPE html><html><head><script src=\"https://code.jquery.com/jquery-2.2.4.min.js\"></script></head><body><h1>Items</h1><table border=\"1\"><tr><th>name</th><th>price</th></tr>' ); var row; while( row = getRow() ){  var url = '../../_show/design_name/';  send( ' <tr data-href=\"' + url + row.id + '\"><td><a href=\"' + url + row.id + '\">' + row.value.name + '</a></td><td><a href=\"' + url + row.id + '\">' + row.value.price + '</a></td></tr>' ); } send( '</table></html>' );}"
+    design_name: "function(head,row){ start( { 'headers': { 'content-type': 'text/html; charset=utf-8' } } ); send( '<!DOCTYPE html><html><head><title>List</title></head><body><h1>Items</h1><table border=\"1\"><tr><th>name</th><th>price</th></tr>' ); var row; while( row = getRow() ){  var url = '../../_show/design_name/';  send( ' <tr data-href=\"' + url + row.id + '\"><td><a href=\"' + url + row.id + '\">' + row.value.name + '</a></td><td><a href=\"' + url + row.id + '\">' + row.value.price + '</a></td></tr>' ); } send( '</table></html>' );}"
   },
   shows: {
-    design_name: "(function(doc,req){ if( doc ){ start( {'headers':{'content-type':'text/html; charset=utf-8'}} ); var str = '<!DOCTYPE html><html><head><script src=\"https://code.jquery.com/jquery-2.2.4.min.js\"></script></head><body><h2>' + doc.name + '</h2><h3>' + doc.price + '</h3></body></html>'; return str; }else{ return 'empty'; }})"
+    design_name: "(function(doc,req){ if( doc ){ start( {'headers':{'content-type':'text/html; charset=utf-8'}} ); var str = '<!DOCTYPE html><html><head><title>' + doc.name + '</title></head><body><h2>' + doc.name + '</h2><h3>' + doc.price + '</h3></body></html>'; return str; }else{ return 'empty'; }})"
   }
 }
 ```
