@@ -193,6 +193,7 @@ design_doc = {
 - `bulk_import.js` and `sample_blogdoc.json`
   - `bulk_import.js` is standalone node.js application which generates a db, docs, and a design document for HTML for _lists and _shows, based on `sample_blogdoc.json` template.
   - After executing `$ node bulk_import sample_blogdoc.json`, it generates db named `blogs`, and you can view `https://(base_url)/blogs/_design/myblog/_list/myblog/myblog` for those contents in HTML.
+  - You can edit(CRUD) those contents in above [Sample web application](https://dotnsf.github.io/couchdb-crud-sdk/) as CMS.
 
 
 ## References
