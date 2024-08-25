@@ -99,7 +99,7 @@ async function bulk_import( sample_doc ){
                 for( var i = 0; i < rows.length; i ++ ){
                   table += '<th>' + rows[i] + '</th>';
                 }
-                table += '</tr></table>';
+                table += '</tr>';
                 lists += table;
               }
               lists += "' ); var row; while( row = getRow() ){  var url = '../../_show/" + design_name + "/';  send( ' <tr data-href=\"' + url + row.id + '\">";
@@ -148,20 +148,20 @@ async function bulk_import( sample_doc ){
               doc.shows = {};
               doc.shows[design_name] = shows;
             }
-            console.log( {doc} );
+            //console.log( {doc} );
 
             //. create design doc
             var doc_id = '_design/' + design_name;
             doc._id = doc_id;
             axios.get( base_url + '/' + db + '/' + doc_id, config ).then( async function( r3 ){
               doc._rev = r3.data._rev;
-              var r4 = await axios.post( base_url + '/' + db + '/' + doc_id + '?rev=' + doc._rev, doc, config );
-              console.log( 0, {r4} );
+              var r4 = await axios.put( base_url + '/' + db + '/' + doc_id + '?rev=' + doc._rev, doc, config );
+              //console.log( {r4} );
               r = { status: true, result: 'successfully updated design documents.' };
               resolve( r );
             }).catch( async function( e ){
-              var r4 = await axios.post( base_url + '/' + db + '/' + doc_id, doc, config ); //. Content-Type must be multipart/form-data'
-              console.log( 1, {r4} );
+              var r4 = await axios.put( base_url + '/' + db + '/' + doc_id, doc, config );
+              //console.log( {r4} );
               r = { status: true, result: 'successfully created design documents.' };
               resolve( r );
             });
