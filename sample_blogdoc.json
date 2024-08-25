@@ -1,0 +1,35 @@
+{
+  "db": "blogs",
+  "docs": [
+    { "type": "blog", "username": "K.Kimura", "subject": "筋トレ記録", "category": "", "body": "2024/Aug/24 5kmラン（30分）、20分自転車、ボディパンプ60" },
+    { "type": "blog", "username": "dotnsf", "subject": "facebook の vi キーバインド", "category": "技術", "body": "facebook.com でも vi キーバインドが使えるらしい。k, j で上下" },
+    { "type": "blog", "username": "K.Kimura", "subject": "大谷さん", "category": "日常", "body": "40-40 を史上初めて同日に達成！" },
+    { "type": "blog", "username": "dotnsf", "subject": "twitter の vi キーバインド", "category": "技術", "body": "twitter.com で vi キーバインドが使えるらしい。k, j で上下" }
+  ],
+  "design_docs": {
+    "design_names": {
+      "myblog": {
+        "views_map": {
+          "condition": "doc.type == 'blog'",
+          "emits": [ "username", "subject", "category", "body" ]
+        },
+        "lists": {
+          "external_scripts": [ "https://code.jquery.com/jquery-2.2.4.min.js" ],
+          "external_csss": [],
+          "script": "",
+          "css": "html, body { width: 100%; height: 100%; padding: 0px; margin: 0px; background: #ffc; } a { text-decoration: none; }",
+          "title": "Blogs",
+          "rows": [ "subject", "category", "username" ]
+        },
+        "shows": {
+          "external_scripts": [ "https://code.jquery.com/jquery-2.2.4.min.js" ],
+          "external_csss": [],
+          "script": "",
+          "css": "html, body { width: 100%; height: 100%; padding: 0px; margin: 0px; background: #fcc; }",
+          "title": "' + doc.subject + '",
+          "body": "<h1>' + doc.subject + '</h1><h2>' + doc.category + '</h2><hr/>' + doc.body + '<div align=\'right\'>' + doc.username + '</div>'",
+        }
+      }
+    }
+  }
+}

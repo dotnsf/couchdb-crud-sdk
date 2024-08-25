@@ -10,5 +10,9 @@
     "repository": {},
     "engines": {
         "node": "16.x"
+    },
+    "devDependencies": {
+        "axios": "^1.7.5",
+        "dotenv": "^16.4.5"
     }
 }
