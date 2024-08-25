@@ -142,7 +142,6 @@ design_doc = {
     - `  :`
     - `});`
 
-
 - APIs for attached file(s)
   - document have to be created before following APIs
   - Create/Update file into document
@@ -165,6 +164,10 @@ design_doc = {
     - `cdb.readTextLocalFile( 'selector', 'utf-8' ).then( function( r ){`
     - `  :`
     - `});`
+
+- APIs for etc..
+  - Sanitize text for displaying in HTML
+    - `var sanitized_text = cdb.sanitize( text );`
 
 
 ## Returned value
