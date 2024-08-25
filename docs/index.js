@@ -15,7 +15,10 @@ function login( no_ui ){
 
         if( !no_ui ){
           var dbs_list = '<table class="table">'
-            + '<tr><th><button class="btn btn-primary" onClick="create_db()">Create DB</button></th></tr>';
+            + '<tr><th>'
+            + '<button class="btn btn-secondary" onClick="reload_db()">Reload DB</button>'
+            + '<button class="btn btn-primary" onClick="create_db()">Create DB</button>'
+            + '</th></tr>';
           for( var i = 0; i < dbs.length; i ++ ){
             dbs_list += '<tr><td class="dbname dbname-' + dbs[i] + '"><a href="#" onClick="get_docs(\'' + dbs[i] + '\')">' + dbs[i] + '</a></td></tr>';
           }
@@ -31,15 +34,19 @@ function login( no_ui ){
   });
 }
 
+function reload_db(){
+  $('#dbs_list').html( '' );
+  $('#docs_list').html( '' );
+
+  login();
+}
+
 async function create_db(){
   var dbname = prompt( '新たに追加するデータベース名を入力してください', '' );
   if( dbname ){
     var r = await cdb.createDb( dbname );  //. { ok: true }
     if( r && r.status ){
-      $('#dbs_list').html( '' );
-      $('#docs_list').html( '' );
-
-      login();
+      reload_db();
     }
   }
 }
@@ -48,10 +55,7 @@ async function delete_db( db ){
   if( confirm( 'データベース: '+ db + 'を本当に削除しますか？' ) ){
     var r = await cdb.deleteDb( db );  //. { ok: true }
     if( r && r.status ){
-      $('#dbs_list').html( '' );
-      $('#docs_list').html( '' );
-
-      login();
+      reload_db();
     }
   }
 }

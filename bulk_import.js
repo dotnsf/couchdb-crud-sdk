@@ -19,7 +19,8 @@ async function bulk_import( sample_doc ){
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        'Authorization': 'Basic ' + base64
+        'Authorization': 'Basic ' + base64,
+        'Referer': base_url
       }
      };
 
@@ -28,13 +29,17 @@ async function bulk_import( sample_doc ){
       //console.log( {r0} );
       if( r0 && r0.status && r0.status == 200 && r0.data ){  //. { ok: true }
         //. create db
-        var r1 = await axios.put( base_url + '/' + db, null, { headers: { Accept: 'application/json', Authorization: 'Basic' + base64 } } );
-        //.console.log( {r1} );
+        try{
+          var r1 = await axios.put( base_url + '/' + db, null, config );
+          //.console.log( {r1} );
+        }catch( e ){
+          //.console.log( {e} );
+        }
 
         if( sample_doc.docs ){
           //. bulk insert
-          //var r2 = await axios.post( '/' + db + '/_bulk_docs', { docs: sample_doc.docs }, config );
-          //console.log( {r2} );
+          var r2 = await axios.post( base_url + '/' + db + '/_bulk_docs', { docs: sample_doc.docs }, config );
+          //.console.log( {r2} );
         }
 
         if( sample_doc.design_docs ){
@@ -148,26 +153,30 @@ async function bulk_import( sample_doc ){
             //. create design doc
             var doc_id = '_design/' + design_name;
             doc._id = doc_id;
-            var r3 = await axios.get( base_url + '/' + db + '/' + doc_id, config );
-            //console.log( {r3} );
-            console.log( r3.status );
-            if( r3.status == 404 ){
-              var r4 = await axios.post( base_url + '/' + db + '/' + doc_id, doc, config );
-              console.log( {r4} );
-            }else{
+            axios.get( base_url + '/' + db + '/' + doc_id, config ).then( async function( r3 ){
               doc._rev = r3.data._rev;
               var r4 = await axios.post( base_url + '/' + db + '/' + doc_id + '?rev=' + doc._rev, doc, config );
-              console.log( {r4} );
-            }
+              console.log( 0, {r4} );
+              r = { status: true, result: 'successfully updated design documents.' };
+              resolve( r );
+            }).catch( async function( e ){
+              var r4 = await axios.post( base_url + '/' + db + '/' + doc_id, doc, config ); //. Content-Type must be multipart/form-data'
+              console.log( 1, {r4} );
+              r = { status: true, result: 'successfully created design documents.' };
+              resolve( r );
+            });
           });
         }
       }else{
+        console.log( 'failed to access to couchdb.' );
+        r = { status: false, error: 'failed to access to couchdb.' };
+        resolve( r );
       }
     }else{
       console.log( 'no db specified in specified JSON file.' );
+      r = { status: false, error: 'no db specified in specified JSON file.' };
+      resolve( r );
     }
-
-    resolve( r );
   });
 }
 
