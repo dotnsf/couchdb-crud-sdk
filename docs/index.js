@@ -16,8 +16,8 @@ function login( no_ui ){
         if( !no_ui ){
           var dbs_list = '<table class="table">'
             + '<tr><th>'
-            + '<button class="btn btn-secondary" onClick="reload_db()">Reload DB</button>'
-            + '<button class="btn btn-primary" onClick="create_db()">Create DB</button>'
+            + '<button class="btn btn-xs btn-secondary" onClick="reload_db()">Reload</button>'
+            + '<button class="btn btn-xs btn-primary" onClick="create_db()">Create DB</button>'
             + '</th></tr>';
           for( var i = 0; i < dbs.length; i ++ ){
             dbs_list += '<tr><td class="dbname dbname-' + dbs[i] + '"><a href="#" onClick="get_docs(\'' + dbs[i] + '\')">' + dbs[i] + '</a></td></tr>';
