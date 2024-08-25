@@ -9,7 +9,7 @@ function login( no_ui ){
   cdb.readAllDbs().then( function( r ){
     if( r && r.status ){
       var dbs = r.result;
-      //console.log( {dbs} );
+      //.console.log( {dbs} );
       if( dbs.length >= 0 ){
         $('.db_login').prop( 'disabled', true );
 
