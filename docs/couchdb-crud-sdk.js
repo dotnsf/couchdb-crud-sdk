@@ -145,7 +145,6 @@ class CouchDB_CRUD_SDK{
         if( r && r.status && r.result && r.result._id ){
           //. update
           var doc = r.result;
-        console.log( {doc} );
           design_doc._rev = doc._rev;
           url += '?rev=' + doc._rev;
         }else{
