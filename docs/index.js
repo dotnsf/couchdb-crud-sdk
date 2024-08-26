@@ -11,7 +11,7 @@ function login( no_ui ){
       var dbs = r.result;
       //.console.log( {dbs} );
       if( dbs.length >= 0 ){
-        $('.db_login').prop( 'disabled', true );
+        $('#nav-bar').css( 'display', 'none' );
 
         if( !no_ui ){
           var dbs_list = '<table class="table">'
