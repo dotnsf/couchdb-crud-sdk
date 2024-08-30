@@ -145,8 +145,8 @@ design_doc = {
 - APIs for attached file(s)
   - document have to be created before following APIs
   - Create/Update file into document
-    - `var r = await cdb.saveFile( 'db', 'doc_id', 'selector' );` or
-    - `cdb.saveFile( 'db', 'doc_id', 'selector' ).then( function( r ){`
+    - `var r = await cdb.saveFile( 'db', 'doc_id', 'selector', 'filename' );` or
+    - `cdb.saveFile( 'db', 'doc_id', 'selector', 'filename' ).then( function( r ){`
     - `  :`
     - `});`
   - Read file from document
@@ -185,7 +185,7 @@ design_doc = {
 
 ## Sample
 
-[Sample web application](https://dotnsf.github.io/couchdb-crud-sdk/)
+[Sample web application](https://dotnsf.github.io/couchdb-crud-sdk/viewer.html)
 
 
 ## Extras
