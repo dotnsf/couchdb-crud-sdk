@@ -401,7 +401,7 @@ class CouchDB_CRUD_SDK{
 
 
   //. #1 add/update _attachments
-  saveFile = async function( db, doc_id, selector ){
+  saveFile = async function( db, doc_id, selector, filename ){
     return new Promise( async ( resolve, reject ) => {
       var self = this;
       var r = null;
@@ -410,7 +410,7 @@ class CouchDB_CRUD_SDK{
         if( r && r.status ){
           if( selector ){
             var file = document.querySelector( selector ).files[0];
-            var name = file.name;
+            var name = filename ? filename : file.name;
             var doc = r.result;
             if( doc ){
               var reader = new FileReader();
@@ -471,24 +471,28 @@ class CouchDB_CRUD_SDK{
   }
 
   //. #1 get _attachments
-  readFile = async function( db, doc_id, filename ){
+  readFile = async function( db, doc_id, doc_rev, filename ){
     return new Promise( async ( resolve, reject ) => {
       var self = this;
       var r = null;
       try{
-        var result = await fetch( this.base_url + '/' + db + '/' + doc_id + '?attachments=true', {
+        var url = this.base_url + '/' + db + '/' + doc_id + '/' + filename;
+        if( doc_rev ){ url += '?rev=' + doc_rev; }
+        //var result = await fetch( this.base_url + '/' + db + '/' + doc_id + '?attachments=true', {
+        var result = await fetch( url, {
           headers: {
+            'Accept': 'application/json',
             'Authorization': 'Basic ' + this.base64,
             'Content-Type': 'application/json' 
           }
         });
-        var json = await result.json();  //. { _id: 'xxx', _rev: 'yyy', _attachments: { 'filename1': { .. }, .. } }
-        if( json && json._attachments && json._attachments[filename] ){
-          r = { status: true, result: json._attachments[filename] };  //. { content_type: 'image/png', data: 'base64data', .. }
+        var blob = await result.blob();
+        //console.log( {blob} );
+        if( blob ){
+          r = { status: true, result: blob };  //. { type: 'image/png', size: 50667, .... }
         }else{
           r = { status: false, error: 'no attached file found for name = ' + filename };
         }
-        r = { status: true, result: json };
       }catch( e ){
         r = { status: false, error: e };
         console.log( e );
@@ -509,7 +513,7 @@ class CouchDB_CRUD_SDK{
           if( filename ){
             var doc = r.result;
             if( doc._attachments && doc._attachments[filename] ){
-              delete doc._attachments[name];
+              delete doc._attachments[filename];
   
               r = await self.updateDoc( db, doc_id, doc );
               resolve( r );

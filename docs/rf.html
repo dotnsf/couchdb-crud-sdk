@@ -51,10 +51,11 @@
       </div>
       <div class="modal-body" id="viewmodal-body">
         <table class="table">
-          <tr><td>subject</td><td><input type="text" id="view_subject" class="form-control" value="" disabled/></td></tr>
+          <tr><td>filename</td><td><input type="text" id="view_subject" class="form-control" value="" disabled/></td></tr>
           <tr><td>username</td><td><input type="text" id="view_username" class="form-control" value="" disabled/></td></tr>
           <tr><td>body</td><td><textarea id="view_body" class="form-control" disabled></textarea></td></tr>
           <tr><td>timestamp</td><td><input type="text" id="view_timestamp" class="form-control" value="" disabled/></td></tr>
+          <tr><td>attachment</td><td id="view_attachment"></td></tr>
         </table>
       </div>
       <div class="modal-footer">
@@ -69,14 +70,13 @@
     <div class="modal-content">
       <input type="hidden" id="edit_db" value=""/>
       <input type="hidden" id="edit_doc_id" value=""/>
-      <div class="modal-header">
+      <div class="modal-header" id="edit_modal_header">
         <!--
-        <input type="file" class="form-control" id="new_doc"/>
+        Attachment: <input type="file" class="form-control" id="edit_attachment"/>
         -->
       </div>
       <div class="modal-body" id="editmodal-body">
         <table class="table">
-          <tr><td>subject</td><td><input type="text" id="edit_subject" class="form-control" value=""/></td></tr>
           <tr><td>username</td><td><input type="text" id="edit_username" class="form-control" value=""/></td></tr>
           <tr><td>body</td><td><textarea id="edit_body" class="form-control"></textarea></td></tr>
         </table>

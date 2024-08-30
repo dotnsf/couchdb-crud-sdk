@@ -150,8 +150,8 @@ design_doc = {
     - `  :`
     - `});`
   - Read file from document
-    - `var r = await cdb.readFile( 'db', 'doc_id', 'filename' );` or
-    - `cdb.readFile( 'db', 'doc_id', 'filename' ).then( function( r ){`
+    - `var r = await cdb.readFile( 'db', 'doc_id', 'doc_rev', 'filename' );` or
+    - `cdb.readFile( 'db', 'doc_id', 'doc_rev', 'filename' ).then( function( r ){`
     - `  :`
     - `});`
   - Delete file from document

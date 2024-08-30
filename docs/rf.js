@@ -67,6 +67,9 @@ async function create_doc( db ){
   $('#edit_subject').val( '' );
   $('#edit_username').val( '' );
   $('#edit_body').val( '' );
+
+  $('#edit_modal_header').html( 'Attachment: <input type="file" class="btn form-control" id="edit_attachment"/>' );
+
   $('#editModal').modal();
 }
 
@@ -79,7 +82,7 @@ async function get_docs( db ){
     var docs = r.result;
     var docs_list = '<table class="table">'
       + '<tr>'
-      + '<td>subject</td>'
+      + '<td>filename</td>'
       + '<td>username</td>'
       + '<td>timestamp</td>'
       + '<td>'
@@ -139,6 +142,9 @@ async function edit_doc( db, doc_id ){
     $('#edit_subject').val( doc.subject );
     $('#edit_username').val( doc.username );
     $('#edit_body').val( doc.body );
+
+    $('#edit_modal_header').html( 'Attachment: <input type="file" class="btn form-control" id="edit_attachment"/>' );
+
     $('#editModal').modal();
   }
 }
@@ -162,6 +168,14 @@ $(function(){
       $('#view_username').val( doc.username );
       $('#view_body').val( doc.body );
       $('#view_timestamp').val( timestamp2yyyymmdd( doc.timestamp ) );
+
+      //. #8
+      if( doc._attachments ){
+        var html = '<button class="btn btn-success" onClick="show_file(\'' + db + '\',\'' + doc_id + '\',\'' + doc_rev + '\',\'' + doc.subject + '\')">' + doc.subject + '</button>';
+        $('#view_attachment').html( html );
+      }else{
+        $('#view_attachment').html( '' );
+      }
     }
   });
 });
@@ -173,11 +187,29 @@ async function save_doc(){
 
   if( !doc_id ){
     var doc = { type: 'file' };
-    doc.subject = $('#edit_subject').val();
     doc.username = $('#edit_username').val();
     doc.body = $('#edit_body').val();
     doc.timestamp = ( new Date() ).getTime();
-    cdb.createDoc( db, doc ).then( function( r ){
+
+    var file_name = null;
+    try{
+      var file = document.querySelector( '#edit_attachment' ).files[0];
+      file_name = file.name;
+    }catch( e ){
+    }
+
+    if( file_name ){
+      doc.subject = file_name;
+    }
+
+    cdb.createDoc( db, doc ).then( async function( r1 ){
+      if( r1 && r1.status ){
+        if( file_name ){
+          doc_id = r1.result.id;
+          var r2 = await cdb.saveFile( db, doc_id, '#edit_attachment', doc.subject );
+        }
+      }
+
       $('#editModal').modal( 'hide' );
       get_docs( db );
     });
@@ -185,15 +217,45 @@ async function save_doc(){
     var r = await cdb.readDoc( db, doc_id );
     if( r && r.status ){
       var doc = r.result;
-      doc.subject = $('#edit_subject').val();
+      //doc.subject = $('#edit_subject').val();
       doc.username = $('#edit_username').val();
       doc.body = $('#edit_body').val();
       doc.timestamp = ( new Date() ).getTime();
-      cdb.updateDoc( db, doc_id, doc ).then( function( r ){
+
+      var file_name = null;
+      try{
+        var file = document.querySelector( '#edit_attachment' ).files[0];
+        file_name = file.name;
+      }catch( e ){
+      }
+
+      cdb.updateDoc( db, doc_id, doc ).then( async function( r1 ){
+        if( r1 && r1.status ){
+          if( file_name ){
+            var r2 = await cdb.saveFile( db, doc_id, '#edit_attachment', doc.subject );
+          }
+        }
+
         $('#editModal').modal( 'hide' );
         get_docs( db );
       });
     }
+  }
+}
+
+async function show_file( db, doc_id, doc_rev, filename ){
+  var r = await cdb.readFile( db, doc_id, doc_rev, filename );
+  if( r && r.status ){
+    var blob = r.result;
+    var url = URL.createObjectURL( blob );
+
+    var a = document.createElement( "a" );
+    document.body.appendChild( a );
+    a.download = filename;
+    a.href = url;
+    a.click();
+    a.remove();
+    URL.revokeObjectURL( url );
   }
 }
 
