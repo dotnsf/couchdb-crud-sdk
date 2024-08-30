@@ -83,6 +83,7 @@ async function get_docs( db ){
     var docs_list = '<table class="table">'
       + '<tr>'
       + '<td>filename</td>'
+      + '<td>subject</td>'
       + '<td>username</td>'
       + '<td>timestamp</td>'
       + '<td>'
@@ -92,6 +93,7 @@ async function get_docs( db ){
       + '</tr>';
     for( var i = 0; i < docs.length; i ++ ){
       docs_list += '<tr>'
+        + '<td>' + docs[i].filename + '</td>'
         + '<td>' + docs[i].subject + '</td>'
         + '<td>' + docs[i].username + '</td>'
         + '<td>' + timestamp2yyyymmdd( docs[i].timestamp ) + '</td>'
@@ -114,6 +116,7 @@ async function get_doc( db, doc_id ){
   if( r && r.status ){
     $('#view_db').val( db );
     $('#view_doc_id').val( doc_id );
+    $('#view_filename').val( '' );
     $('#view_subject').val( '' );
     $('#view_username').val( '' );
     $('#view_body').val( '' );
@@ -164,6 +167,7 @@ $(function(){
     var r = await cdb.readDoc( db, doc_id, doc_rev );
     if( r && r.status ){
       var doc = r.result;
+      $('#view_filename').val( doc.filename );
       $('#view_subject').val( doc.subject );
       $('#view_username').val( doc.username );
       $('#view_body').val( doc.body );
@@ -171,7 +175,7 @@ $(function(){
 
       //. #8
       if( doc._attachments ){
-        var html = '<button class="btn btn-success" onClick="show_file(\'' + db + '\',\'' + doc_id + '\',\'' + doc_rev + '\',\'' + doc.subject + '\')">' + doc.subject + '</button>';
+        var html = '<button class="btn btn-success" onClick="show_file(\'' + db + '\',\'' + doc_id + '\',\'' + doc_rev + '\',\'' + doc.filename + '\')">' + doc.filename + '</button>';
         $('#view_attachment').html( html );
       }else{
         $('#view_attachment').html( '' );
@@ -187,6 +191,7 @@ async function save_doc(){
 
   if( !doc_id ){
     var doc = { type: 'file' };
+    doc.subject = $('#edit_subject').val();
     doc.username = $('#edit_username').val();
     doc.body = $('#edit_body').val();
     doc.timestamp = ( new Date() ).getTime();
@@ -199,14 +204,14 @@ async function save_doc(){
     }
 
     if( file_name ){
-      doc.subject = file_name;
+      doc.filename = file_name;
     }
 
     cdb.createDoc( db, doc ).then( async function( r1 ){
       if( r1 && r1.status ){
         if( file_name ){
           doc_id = r1.result.id;
-          var r2 = await cdb.saveFile( db, doc_id, '#edit_attachment', doc.subject );
+          var r2 = await cdb.saveFile( db, doc_id, '#edit_attachment', doc.filename );
         }
       }
 
@@ -217,7 +222,7 @@ async function save_doc(){
     var r = await cdb.readDoc( db, doc_id );
     if( r && r.status ){
       var doc = r.result;
-      //doc.subject = $('#edit_subject').val();
+      doc.subject = $('#edit_subject').val();
       doc.username = $('#edit_username').val();
       doc.body = $('#edit_body').val();
       doc.timestamp = ( new Date() ).getTime();
@@ -232,7 +237,7 @@ async function save_doc(){
       cdb.updateDoc( db, doc_id, doc ).then( async function( r1 ){
         if( r1 && r1.status ){
           if( file_name ){
-            var r2 = await cdb.saveFile( db, doc_id, '#edit_attachment', doc.subject );
+            var r2 = await cdb.saveFile( db, doc_id, '#edit_attachment', doc.filename );
           }
         }
 
