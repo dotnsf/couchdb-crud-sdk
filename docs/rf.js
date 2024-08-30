@@ -11,7 +11,8 @@ function login( no_ui ){
       var dbs = r.result;
       //.console.log( {dbs} );
       if( dbs.length >= 0 ){
-        $('#nav-bar').css( 'display', 'none' );
+        $('#nav-bar-0').css( 'display', 'none' );
+        $('#nav-bar-1').css( 'display', 'block' );
 
         if( !no_ui ){
           var dbs_list = '<table class="table">'
@@ -83,7 +84,7 @@ async function get_docs( db ){
       + '<td>timestamp</td>'
       + '<td>'
       + '<button class="btn btn-danger" onClick="delete_db(\'' + db + '\')">Delete DB</button>'
-      + '<button class="btn btn-primary" onClick="create_doc(\'' + db + '\')">Create File</button>'
+      + '<button class="btn btn-primary" onClick="create_doc(\'' + db + '\')">Create</button>'
       + '</td>'
       + '</tr>';
     for( var i = 0; i < docs.length; i ++ ){
@@ -92,9 +93,9 @@ async function get_docs( db ){
         + '<td>' + docs[i].username + '</td>'
         + '<td>' + timestamp2yyyymmdd( docs[i].timestamp ) + '</td>'
         + '<td>'
-        + '<button class="btn btn-success" onClick="get_doc(\'' + db + '\', \'' + docs[i]._id + '\')">Show File</button>'
-        + '<button class="btn btn-warning" onClick="edit_doc(\'' + db + '\',\'' + docs[i]._id + '\')">Edit File</button>'
-        + '<button class="btn btn-danger" onClick="delete_doc(\'' + db + '\',\'' + docs[i]._id + '\',\'' + docs[i]._rev + '\')">Delete File</button>'
+        + '<button class="btn btn-success" onClick="get_doc(\'' + db + '\', \'' + docs[i]._id + '\')">Show</button>'
+        + '<button class="btn btn-warning" onClick="edit_doc(\'' + db + '\',\'' + docs[i]._id + '\')">Edit</button>'
+        + '<button class="btn btn-danger" onClick="delete_doc(\'' + db + '\',\'' + docs[i]._id + '\',\'' + docs[i]._rev + '\')">Delete</button>'
         + '</td>'
         + '</tr>';
       //console.log( docs[i] );
@@ -110,10 +111,10 @@ async function get_doc( db, doc_id ){
   if( r && r.status ){
     $('#view_db').val( db );
     $('#view_doc_id').val( doc_id );
-    $('#view_subject').html( '' );
-    $('#view_username').html( '' );
-    $('#view_body').html( '' );
-    $('#view_timestamp').html( '' );
+    $('#view_subject').val( '' );
+    $('#view_username').val( '' );
+    $('#view_body').val( '' );
+    $('#view_timestamp').val( '' );
 
     var revs = r.result;
     for( var i = 0; i < revs.length; i ++ ){
@@ -157,10 +158,10 @@ $(function(){
     var r = await cdb.readDoc( db, doc_id, doc_rev );
     if( r && r.status ){
       var doc = r.result;
-      $('#view_subject').html( doc.subject );
-      $('#view_username').html( doc.username );
-      $('#view_body').html( '<pre>' + doc.body + '</pre>' );
-      $('#view_timestamp').html( timestamp2yyyymmdd( doc.timestamp ) );
+      $('#view_subject').val( doc.subject );
+      $('#view_username').val( doc.username );
+      $('#view_body').val( doc.body );
+      $('#view_timestamp').val( timestamp2yyyymmdd( doc.timestamp ) );
     }
   });
 });
