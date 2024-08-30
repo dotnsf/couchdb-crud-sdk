@@ -11,7 +11,8 @@ function login( no_ui ){
       var dbs = r.result;
       //.console.log( {dbs} );
       if( dbs.length >= 0 ){
-        $('#nav-bar').css( 'display', 'none' );
+        $('#nav-bar-0').css( 'display', 'none' );
+        $('#nav-bar-1').css( 'display', 'block' );
 
         if( !no_ui ){
           var dbs_list = '<table class="table">'
@@ -61,10 +62,14 @@ async function delete_db( db ){
 }
 
 async function create_doc( db ){
-  var sample_json = { name: 'name' };
-  var textarea_html = JSON.stringify( sample_json, null, 2 );
-  $('#editModalLabel').html( db + ' - createDoc' );
-  $('#editModal_textarea').html( textarea_html );
+  $('#edit_db').val( db );
+  $('#edit_doc_id').val( '' );
+  $('#edit_subject').val( '' );
+  $('#edit_username').val( '' );
+  $('#edit_body').val( '' );
+
+  $('#edit_modal_header').html( 'Attachment: <input type="file" class="btn form-control" id="edit_attachment"/>' );
+
   $('#editModal').modal();
 }
 
@@ -77,19 +82,25 @@ async function get_docs( db ){
     var docs = r.result;
     var docs_list = '<table class="table">'
       + '<tr>'
-      + '<td>_id</td>'
+      + '<td>filename</td>'
+      + '<td>subject</td>'
+      + '<td>username</td>'
+      + '<td>timestamp</td>'
       + '<td>'
       + '<button class="btn btn-danger" onClick="delete_db(\'' + db + '\')">Delete DB</button>'
-      + '<button class="btn btn-primary" onClick="create_doc(\'' + db + '\')">Create Doc</button>'
+      + '<button class="btn btn-primary" onClick="create_doc(\'' + db + '\')">Create</button>'
       + '</td>'
       + '</tr>';
     for( var i = 0; i < docs.length; i ++ ){
       docs_list += '<tr>'
-        + '<td>' + docs[i]._id + '</td>'
+        + '<td>' + docs[i].filename + '</td>'
+        + '<td>' + docs[i].subject + '</td>'
+        + '<td>' + docs[i].username + '</td>'
+        + '<td>' + timestamp2yyyymmdd( docs[i].timestamp ) + '</td>'
         + '<td>'
-        + '<button class="btn btn-success" onClick="get_doc(\'' + db + '\', \'' + docs[i]._id + '\')">Show Doc</button>'
-        + '<button class="btn btn-warning" onClick="edit_doc(\'' + db + '\',\'' + docs[i]._id + '\')">Edit Doc</button>'
-        + '<button class="btn btn-danger" onClick="delete_doc(\'' + db + '\',\'' + docs[i]._id + '\',\'' + docs[i]._rev + '\')">Delete Doc</button>'
+        + '<button class="btn btn-success" onClick="get_doc(\'' + db + '\', \'' + docs[i]._id + '\')">Show</button>'
+        + '<button class="btn btn-warning" onClick="edit_doc(\'' + db + '\',\'' + docs[i]._id + '\')">Edit</button>'
+        + '<button class="btn btn-danger" onClick="delete_doc(\'' + db + '\',\'' + docs[i]._id + '\',\'' + docs[i]._rev + '\')">Delete</button>'
         + '</td>'
         + '</tr>';
       //console.log( docs[i] );
@@ -100,15 +111,28 @@ async function get_docs( db ){
 }
 
 async function get_doc( db, doc_id ){
-  var r = await cdb.readDoc( db, doc_id );
+  $('#doc_revs').html( '' );
+  var r = await cdb.readAllRevisions( db, doc_id );
   if( r && r.status ){
-    var doc = r.result;
-    var body = '<pre>'
-      + cdb.sanitize( JSON.stringify( doc, null, 2 ) )
-      + '</pre>';
-    $('#docModalLabel').html( db + ' - ' + doc_id + ' - readDoc' );
-    $('#docmodal-body').html( body );
-    $('#docModal').modal();
+    $('#view_db').val( db );
+    $('#view_doc_id').val( doc_id );
+    $('#view_filename').val( '' );
+    $('#view_subject').val( '' );
+    $('#view_username').val( '' );
+    $('#view_body').val( '' );
+    $('#view_timestamp').val( '' );
+
+    var revs = r.result;
+    for( var i = 0; i < revs.length; i ++ ){
+      //var opt = '<option value="' + revs[i] + '"' + ( i == 0 ? ' selected' : '' ) +  '>' + revs[i] + '</option>';
+      var opt = '<option value="' + revs[i] + '">' + revs[i] + '</option>';
+      $('#doc_revs').append( opt );
+    }
+    if( revs.length > 0 ){
+      $('#doc_revs').val( revs[0] ).trigger( 'change' );  //. change() イベントを発火
+    }
+
+    $('#viewModal').modal();
   }
 }
 
@@ -116,38 +140,150 @@ async function edit_doc( db, doc_id ){
   var r = await cdb.readDoc( db, doc_id );
   if( r && r.status ){
     var doc = r.result;
-    var textarea_html = JSON.stringify( doc, null, 2 );
-    $('#editModalLabel').html( db + ' - ' + doc._id + ' - updateDoc' );
-    $('#editModal_textarea').html( textarea_html );
+    $('#edit_db').val( db );
+    $('#edit_doc_id').val( doc_id );
+    $('#edit_subject').val( doc.subject );
+    $('#edit_username').val( doc.username );
+    $('#edit_body').val( doc.body );
+
+    $('#edit_modal_header').html( 'Attachment: <input type="file" class="btn form-control" id="edit_attachment"/>' );
+
     $('#editModal').modal();
   }
 }
 
 async function delete_doc( db, doc_id, doc_rev ){
-  if( confirm( 'データベース: ' + db + ' から _id = ' + doc_id + ', _rev = ' + doc_rev + ' のドキュメントを本当に削除しますか？' ) ){
+  if( confirm( 'データベース: ' + db + ' から _id = ' + doc_id + ', _rev = ' + doc_rev + ' のファイルを本当に削除しますか？' ) ){
     var r = await cdb.deleteDoc( db, doc_id, doc_rev );  //. { ok: true }
     get_docs( db );
   }
 }
 
 $(function(){
+  $('#doc_revs').change( async function(){
+    var db = $('#view_db').val();
+    var doc_id = $('#view_doc_id').val();
+    var doc_rev = $('#doc_revs option:selected').val();
+    var r = await cdb.readDoc( db, doc_id, doc_rev );
+    if( r && r.status ){
+      var doc = r.result;
+      $('#view_filename').val( doc.filename );
+      $('#view_subject').val( doc.subject );
+      $('#view_username').val( doc.username );
+      $('#view_body').val( doc.body );
+      $('#view_timestamp').val( timestamp2yyyymmdd( doc.timestamp ) );
+
+      //. #8
+      if( doc._attachments ){
+        var html = '<button class="btn btn-success" onClick="show_file(\'' + db + '\',\'' + doc_id + '\',\'' + doc_rev + '\',\'' + doc.filename + '\')">' + doc.filename + '</button>';
+        $('#view_attachment').html( html );
+      }else{
+        $('#view_attachment').html( '' );
+      }
+    }
+  });
 });
 
-//. 編集モーダルを閉じた時
-function save_doc(){
-  var modal_label = $('#editModalLabel').html();
-  var doc_json = JSON.parse( $('#editModal_textarea').val() );
+//. 編集モーダルを閉じた時（ラベル以外の方法で新規か既存かを識別する必要がある）
+async function save_doc(){
+  var db = $('#edit_db').val();
+  var doc_id = $('#edit_doc_id').val();
 
-  var tmp = modal_label.split( ' - ' );
-  if( tmp.length == 2 && tmp[1] == "createDoc" ){
-    cdb.createDoc( tmp[0], doc_json ).then( function( r ){
+  if( !doc_id ){
+    var doc = { type: 'file' };
+    doc.subject = $('#edit_subject').val();
+    doc.username = $('#edit_username').val();
+    doc.body = $('#edit_body').val();
+    doc.timestamp = ( new Date() ).getTime();
+
+    var file_name = null;
+    try{
+      var file = document.querySelector( '#edit_attachment' ).files[0];
+      file_name = file.name;
+    }catch( e ){
+    }
+
+    if( file_name ){
+      doc.filename = file_name;
+    }
+
+    cdb.createDoc( db, doc ).then( async function( r1 ){
+      if( r1 && r1.status ){
+        if( file_name ){
+          doc_id = r1.result.id;
+          var r2 = await cdb.saveFile( db, doc_id, '#edit_attachment', doc.filename );
+        }
+      }
+
       $('#editModal').modal( 'hide' );
-      get_docs( tmp[0] );
+      get_docs( db );
     });
-  }else if( tmp.length == 3 && tmp[2] == "updateDoc" ){
-    cdb.updateDoc( tmp[0], tmp[1], doc_json ).then( function( r ){
-      $('#editModal').modal( 'hide' );
-      get_docs( tmp[0] );
-    });
+  }else{
+    var r = await cdb.readDoc( db, doc_id );
+    if( r && r.status ){
+      var doc = r.result;
+      doc.subject = $('#edit_subject').val();
+      doc.username = $('#edit_username').val();
+      doc.body = $('#edit_body').val();
+      doc.timestamp = ( new Date() ).getTime();
+
+      var file_name = null;
+      try{
+        var file = document.querySelector( '#edit_attachment' ).files[0];
+        file_name = file.name;
+      }catch( e ){
+      }
+
+      cdb.updateDoc( db, doc_id, doc ).then( async function( r1 ){
+        if( r1 && r1.status ){
+          if( file_name ){
+            var r2 = await cdb.saveFile( db, doc_id, '#edit_attachment', doc.filename );
+          }
+        }
+
+        $('#editModal').modal( 'hide' );
+        get_docs( db );
+      });
+    }
   }
+}
+
+async function show_file( db, doc_id, doc_rev, filename ){
+  var r = await cdb.readFile( db, doc_id, doc_rev, filename );
+  if( r && r.status ){
+    var blob = r.result;
+    var url = URL.createObjectURL( blob );
+
+    var a = document.createElement( "a" );
+    document.body.appendChild( a );
+    a.download = filename;
+    a.href = url;
+    a.click();
+    a.remove();
+    URL.revokeObjectURL( url );
+  }
+}
+
+function timestamp2yyyymmdd( t ){
+  if( typeof t == 'string' ){
+    t = parseInt( t );
+  }
+
+  var dt = new Date();
+  dt.setTime( t );
+  var yyyy = dt.getFullYear();
+  var mm = dt.getMonth() + 1;
+  var dd = dt.getDate();
+  var hh = dt.getHours();
+  var nn = dt.getMinutes();
+  var ss = dt.getSeconds();
+
+  var yyyymmdd = yyyy
+    + '-' + ( mm < 10 ? '0' : '' ) + mm
+    + '-' + ( dd < 10 ? '0' : '' ) + dd
+    + ' ' + ( hh < 10 ? '0' : '' ) + hh
+    + ':' + ( nn < 10 ? '0' : '' ) + nn
+    + ':' + ( ss < 10 ? '0' : '' ) + ss;
+
+  return yyyymmdd;
 }

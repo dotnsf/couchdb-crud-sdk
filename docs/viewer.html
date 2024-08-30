@@ -8,8 +8,8 @@
 <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.5.1/js/bootstrap.min.js"></script>
 <script src="./couchdb-crud-sdk.js"></script>
 
-<script src="./index.js"></script>
-<link href="./index.css" rel="stylesheet"/>
+<script src="./viewer.js"></script>
+<link href="./viewer.css" rel="stylesheet"/>
 
 <link rel="shortcut icon" href="./logo.png" type="image/png"/>
 <link rel="icon" href="./logo.png" type="image/png"/>
@@ -18,22 +18,18 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
-<meta name="apple-mobile-web-app-title" content="RF(Revisioned Files)"/>
+<meta name="apple-mobile-web-app-title" content="CouchDB CRUD SDK"/>
 
-<title>RF(Revisioned Files)</title>
+<title>CouchDB CRUD SDK</title>
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-light bg-light" id="nav-bar-0">
-  <a class="navbar-brand" href="#">RF</a>
+<nav class="navbar navbar-expand-lg navbar-light bg-light" id="nav-bar">
+  <a class="navbar-brand" href="#">CouchDB CRUD SDK</a>
   <input id="db_username" class="form-control db_login" type="text" placeholder="username" value=""/>
   <input id="db_password" class="form-control db_login" type="password" placeholder="password" value=""/>
   <input id="db_base_url" class="form-control db_login" type="text" placeholder="base url" value=""/>
   <button id="db_login" class="btn btn-primary db_login" onClick="login();">Login</button>
-</nav>
-
-<nav class="navbar navbar-expand-lg navbar-light bg-light" id="nav-bar-1" style="display:none;">
-  <a class="navbar-brand" href="#">RF</a>
 </nav>
 
 <div class="container" id="main_div">
@@ -41,23 +37,13 @@
   <div id="docs_list"></div>
 </div>
 
-<div class="modal bd-example-modal-lg fade" id="viewModal" tabindex="-1" role="dialog" aria-labbelledby="viewModal" aria-hidden="true">
+<div class="modal bd-example-modal-lg fade" id="docModal" tabindex="-1" role="dialog" aria-labbelledby="docModal" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-      <input type="hidden" id="view_db" value=""/>
-      <input type="hidden" id="view_doc_id" value=""/>
       <div class="modal-header">
-        Revisions: <select id="doc_revs" class="form-control" name="doc_revs"></select>
+        <h4 class="modal-title" id="docModalLabel"></h4>
       </div>
-      <div class="modal-body" id="viewmodal-body">
-        <table class="table">
-          <tr><td>filename</td><td><input type="text" id="view_filename" class="form-control" value="" disabled/></td></tr>
-          <tr><td>subject</td><td><input type="text" id="view_subject" class="form-control" value="" disabled/></td></tr>
-          <tr><td>username</td><td><input type="text" id="view_username" class="form-control" value="" disabled/></td></tr>
-          <tr><td>body</td><td><textarea id="view_body" class="form-control" disabled></textarea></td></tr>
-          <tr><td>timestamp</td><td><input type="text" id="view_timestamp" class="form-control" value="" disabled/></td></tr>
-          <tr><td>attachment</td><td id="view_attachment"></td></tr>
-        </table>
+      <div class="modal-body" id="docmodal-body">
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -69,19 +55,11 @@
 <div class="modal bd-example-modal-lg fade" id="editModal" tabindex="-1" role="dialog" aria-labbelledby="editModal" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-      <input type="hidden" id="edit_db" value=""/>
-      <input type="hidden" id="edit_doc_id" value=""/>
-      <div class="modal-header" id="edit_modal_header">
-        <!--
-        Attachment: <input type="file" class="form-control" id="edit_attachment"/>
-        -->
+      <div class="modal-header">
+        <h4 class="modal-title" id="editModalLabel"></h4>
       </div>
       <div class="modal-body" id="editmodal-body">
-        <table class="table">
-          <tr><td>subject</td><td><input type="text" id="edit_subject" class="form-control" value=""/></td></tr>
-          <tr><td>username</td><td><input type="text" id="edit_username" class="form-control" value=""/></td></tr>
-          <tr><td>body</td><td><textarea id="edit_body" class="form-control"></textarea></td></tr>
-        </table>
+        <textarea class="form-control" id="editModal_textarea"></textarea>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
