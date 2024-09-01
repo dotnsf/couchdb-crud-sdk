@@ -32,7 +32,7 @@ a {
   width: calc(100% - 200px); 
 }
 
-/*
+/* #11
 #attachment_preview{
   position: relative;
   padding-bottom: 20.25%;
@@ -48,3 +48,23 @@ a {
   height: 100;
 }
 */
+
+input[type='file'] {
+  color: rgb( 31, 55, 41 );
+  cursor: pointer;
+  border: 1px solid rgb( 191, 199, 194 );
+  border-radius: 0.375rem;
+  padding-right: 0.5rem;
+  width: 24rem;
+}
+
+::file-selector-button,
+::-webkit-file-upload-button{
+  background-color: rgb( 40, 167, 69 );
+  color: rgb( 31, 55, 41 );
+  border: none;
+  cursor: pointer;
+  border-right: 1px solid rgb( 191, 199, 194 );
+  padding: 0.25rem 1rem;
+  margin-right: 1rem;
+}

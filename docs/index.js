@@ -68,7 +68,8 @@ async function create_doc( db ){
   $('#edit_username').val( '' );
   $('#edit_body').val( '' );
 
-  $('#edit_attachment_td').html( '<input type="file" class="btn form-control" id="edit_attachment"/>' );
+  //$('#edit_attachment_td').html( '<input type="file" class="btn form-control" id="edit_attachment"/>' );
+  $('#edit_attachment_td').html( '<input type="file" id="edit_attachment"/>' );
 
   $('#editModal').modal();
 }
@@ -153,7 +154,8 @@ async function edit_doc( db, doc_id ){
     $('#edit_username').val( doc.username );
     $('#edit_body').val( doc.body );
 
-    $('#edit_attachment_td').html( '<input type="file" class="btn form-control" id="edit_attachment"/>' );
+    //$('#edit_attachment_td').html( '<input type="file" class="btn form-control" id="edit_attachment"/>' );
+    $('#edit_attachment_td').html( '<input type="file" id="edit_attachment"/>' );
 
     $('#editModal').modal();
   }
