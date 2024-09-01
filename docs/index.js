@@ -189,7 +189,7 @@ $(function(){
         var url = await get_file_url( db, doc_id, doc_rev, doc.filename );
         if( url ){
           var iframe = '<iframe src="' + url + '" width="300" height="100"></iframe>';
-          $('#attachment_preview').html( iframe );
+          //$('#attachment_preview').html( iframe );  //. 画像／PDF 以外うまくいかないので無効化
         }
       }else{
         $('#view_attachment').html( '' );
@@ -278,21 +278,6 @@ async function get_file_url( db, doc_id, doc_rev, filename ){
 }
 
 async function show_file( db, doc_id, doc_rev, filename ){
-  /*
-  var r = await cdb.readFile( db, doc_id, doc_rev, filename );
-  if( r && r.status ){
-    var blob = r.result;
-    var url = URL.createObjectURL( blob );
-
-    var a = document.createElement( "a" );
-    document.body.appendChild( a );
-    a.download = filename;
-    a.href = url;
-    a.click();
-    a.remove();
-    URL.revokeObjectURL( url );
-  }
-    */
   var url = await get_file_url( db, doc_id, doc_rev, filename );
   if( url ){
     var a = document.createElement( "a" );
