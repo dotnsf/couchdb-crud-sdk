@@ -47,16 +47,20 @@
       <input type="hidden" id="view_db" value=""/>
       <input type="hidden" id="view_doc_id" value=""/>
       <div class="modal-header">
+        <!--
         Revisions: <select id="doc_revs" class="form-control" name="doc_revs"></select>
+        -->
       </div>
       <div class="modal-body" id="viewmodal-body">
         <table class="table">
+          <tr><td>revisions</td><td><select id="doc_revs" class="form-control" name="doc_revs"></select></td></tr>
           <tr><td>filename</td><td><input type="text" id="view_filename" class="form-control" value="" disabled/></td></tr>
           <tr><td>subject</td><td><input type="text" id="view_subject" class="form-control" value="" disabled/></td></tr>
           <tr><td>username</td><td><input type="text" id="view_username" class="form-control" value="" disabled/></td></tr>
           <tr><td>body</td><td><textarea id="view_body" class="form-control" disabled></textarea></td></tr>
           <tr><td>timestamp</td><td><input type="text" id="view_timestamp" class="form-control" value="" disabled/></td></tr>
           <tr><td>attachment</td><td id="view_attachment"></td></tr>
+          <tr><td></td><td> <div id="attachment_preview"></div> </td></tr>
         </table>
       </div>
       <div class="modal-footer">
@@ -81,6 +85,7 @@
           <tr><td>subject</td><td><input type="text" id="edit_subject" class="form-control" value=""/></td></tr>
           <tr><td>username</td><td><input type="text" id="edit_username" class="form-control" value=""/></td></tr>
           <tr><td>body</td><td><textarea id="edit_body" class="form-control"></textarea></td></tr>
+          <tr><td>attachment</td><td id="edit_attachment_td"></td></tr>
         </table>
       </div>
       <div class="modal-footer">

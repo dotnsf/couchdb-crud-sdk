@@ -13,6 +13,10 @@ a {
   border: 2px solid #f00;
 }
 
+#db_name {
+  text-align: center;
+}
+
 #main_div {
   display: flex; 
   box-sizing: border-box; 
@@ -27,3 +31,20 @@ a {
 #docs_list {
   width: calc(100% - 200px); 
 }
+
+/*
+#attachment_preview{
+  position: relative;
+  padding-bottom: 20.25%;
+  height: 0;
+  overflow: hidden;
+}
+
+#attachment_preview iframe{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100;
+}
+*/

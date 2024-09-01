@@ -68,7 +68,7 @@ async function create_doc( db ){
   $('#edit_username').val( '' );
   $('#edit_body').val( '' );
 
-  $('#edit_modal_header').html( 'Attachment: <input type="file" class="btn form-control" id="edit_attachment"/>' );
+  $('#edit_attachment_td').html( '<input type="file" class="btn form-control" id="edit_attachment"/>' );
 
   $('#editModal').modal();
 }
@@ -80,32 +80,36 @@ async function get_docs( db ){
   var r = await cdb.readAllDocs( db );
   if( r && r.status ){
     var docs = r.result;
-    var docs_list = '<table class="table">'
+    var docs_list = '<div><h2 id="db_name">' + db + '</h2></div>'
+      + '<table class="table">'
+      + '<thead>'
       + '<tr>'
-      + '<td>filename</td>'
-      + '<td>subject</td>'
-      + '<td>username</td>'
-      + '<td>timestamp</td>'
-      + '<td>'
+      + '<th>filename</th>'
+      + '<th>subject</th>'
+      + '<th>username</th>'
+      + '<th>timestamp</th>'
+      + '<th>'
       + '<button class="btn btn-danger" onClick="delete_db(\'' + db + '\')">Delete DB</button>'
-      + '<button class="btn btn-primary" onClick="create_doc(\'' + db + '\')">Create</button>'
-      + '</td>'
+      + '<button class="btn btn-primary" onClick="create_doc(\'' + db + '\')">Create Doc</button>'
+      + '</th>'
       + '</tr>';
+      + '</thead>'
+      + '<tbody>'
     for( var i = 0; i < docs.length; i ++ ){
       docs_list += '<tr>'
-        + '<td>' + docs[i].filename + '</td>'
-        + '<td>' + docs[i].subject + '</td>'
-        + '<td>' + docs[i].username + '</td>'
-        + '<td>' + timestamp2yyyymmdd( docs[i].timestamp ) + '</td>'
+        + '<td><a href="#" onClick="get_doc(\'' + db + '\',\'' + docs[i]._id + '\')">' + docs[i].filename + '</a></td>'
+        + '<td><a href="#" onClick="get_doc(\'' + db + '\',\'' + docs[i]._id + '\')">' + docs[i].subject + '</a></td>'
+        + '<td><a href="#" onClick="get_doc(\'' + db + '\',\'' + docs[i]._id + '\')">' + docs[i].username + '</a></td>'
+        + '<td><a href="#" onClick="get_doc(\'' + db + '\',\'' + docs[i]._id + '\')">' + timestamp2yyyymmdd( docs[i].timestamp ) + '</a></td>'
         + '<td>'
-        + '<button class="btn btn-success" onClick="get_doc(\'' + db + '\', \'' + docs[i]._id + '\')">Show</button>'
+        //+ '<button class="btn btn-success" onClick="get_doc(\'' + db + '\', \'' + docs[i]._id + '\')">Show</button>'
         + '<button class="btn btn-warning" onClick="edit_doc(\'' + db + '\',\'' + docs[i]._id + '\')">Edit</button>'
         + '<button class="btn btn-danger" onClick="delete_doc(\'' + db + '\',\'' + docs[i]._id + '\',\'' + docs[i]._rev + '\')">Delete</button>'
         + '</td>'
         + '</tr>';
       //console.log( docs[i] );
     }
-    docs_list += '</table>';
+    docs_list += '</tbody></table>';
     $('#docs_list').html( docs_list );
   }
 }
@@ -121,6 +125,9 @@ async function get_doc( db, doc_id ){
     $('#view_username').val( '' );
     $('#view_body').val( '' );
     $('#view_timestamp').val( '' );
+
+    $('#view_attachment').html( '' );
+    $('#attachment_preview').html( '' );
 
     var revs = r.result;
     for( var i = 0; i < revs.length; i ++ ){
@@ -146,7 +153,7 @@ async function edit_doc( db, doc_id ){
     $('#edit_username').val( doc.username );
     $('#edit_body').val( doc.body );
 
-    $('#edit_modal_header').html( 'Attachment: <input type="file" class="btn form-control" id="edit_attachment"/>' );
+    $('#edit_attachment_td').html( '<input type="file" class="btn form-control" id="edit_attachment"/>' );
 
     $('#editModal').modal();
   }
@@ -177,8 +184,18 @@ $(function(){
       if( doc._attachments ){
         var html = '<button class="btn btn-success" onClick="show_file(\'' + db + '\',\'' + doc_id + '\',\'' + doc_rev + '\',\'' + doc.filename + '\')">' + doc.filename + '</button>';
         $('#view_attachment').html( html );
+
+        //. #11
+        var url = await get_file_url( db, doc_id, doc_rev, doc.filename );
+        if( url ){
+          var iframe = '<iframe src="' + url + '" width="300" height="100"></iframe>';
+          $('#attachment_preview').html( iframe );
+        }
       }else{
         $('#view_attachment').html( '' );
+
+        //. #11
+        $('#attachment_preview').html( '' );
       }
     }
   });
@@ -248,12 +265,36 @@ async function save_doc(){
   }
 }
 
+//. #11
+async function get_file_url( db, doc_id, doc_rev, filename ){
+  var url = null;
+  var r = await cdb.readFile( db, doc_id, doc_rev, filename );
+  if( r && r.status ){
+    var blob = r.result;
+    url = URL.createObjectURL( blob );
+  }
+
+  return url;
+}
+
 async function show_file( db, doc_id, doc_rev, filename ){
+  /*
   var r = await cdb.readFile( db, doc_id, doc_rev, filename );
   if( r && r.status ){
     var blob = r.result;
     var url = URL.createObjectURL( blob );
 
+    var a = document.createElement( "a" );
+    document.body.appendChild( a );
+    a.download = filename;
+    a.href = url;
+    a.click();
+    a.remove();
+    URL.revokeObjectURL( url );
+  }
+    */
+  var url = await get_file_url( db, doc_id, doc_rev, filename );
+  if( url ){
     var a = document.createElement( "a" );
     document.body.appendChild( a );
     a.download = filename;
