@@ -198,9 +198,9 @@ class CouchDB_CRUD_SDK{
     return new Promise( async ( resolve, reject ) => {
       var r = null;
       try{
-        var url = this.base_url + '/' + db + '/' + doc_id;
+        var url = this.base_url + '/' + db + '/' + doc_id + '?include_docs=true';
         if( doc_rev ){
-          url += '?rev=' + doc_rev;
+          url += '&rev=' + doc_rev;
         }
 
         var result = await fetch( url, {
