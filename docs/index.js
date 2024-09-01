@@ -240,6 +240,12 @@ async function save_doc(){
   }else{
     var r = await cdb.readDoc( db, doc_id );
     if( r && r.status ){
+      //. #10 現在はまずファイル以外の要素を更新し、そのあとでファイルを更新している
+      //. これを一回の更新でできないか？
+
+      //. まずファイル添付があるかどうかを調べて、なければファイル以外の更新を１回実施すればよい
+      //. ファイル添付があった場合は、これを１回で行うような別 SDK が必要？
+
       var doc = r.result;
       doc.subject = $('#edit_subject').val();
       doc.username = $('#edit_username').val();
@@ -253,16 +259,20 @@ async function save_doc(){
       }catch( e ){
       }
 
-      cdb.updateDoc( db, doc_id, doc ).then( async function( r1 ){
-        if( r1 && r1.status ){
-          if( file_name ){
-            var r2 = await cdb.saveFile( db, doc_id, '#edit_attachment', doc.filename );
-          }
-        }
-
-        $('#editModal').modal( 'hide' );
-        get_docs( db );
-      });
+      //. #10
+      if( file_name ){
+        //. cdb.saveFile( db, doc_id, '#edit_attachment', doc.filename ) と
+        //. cdb.updateDoc( db, doc_id, doc ) を１回で行う SDK
+        cdb.saveDocAndFile( db, doc_id, doc, '#edit_attachment', doc.filename ).then( async function( r1 ){
+          $('#editModal').modal( 'hide' );
+          get_docs( db );
+        });
+      }else{
+        cdb.updateDoc( db, doc_id, doc ).then( async function( r1 ){
+          $('#editModal').modal( 'hide' );
+          get_docs( db );
+        });
+      }
     }
   }
 }

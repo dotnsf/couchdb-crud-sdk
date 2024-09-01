@@ -408,6 +408,31 @@ var r = await cdb.saveFile( 'db', 'doc_id', 'selector', 'filename' );
       - `{ status: false, error: (error_reason) }`
 
 
+### Create/Update file into document
+
+```
+var r = await cdb.saveDocAndFile( 'db', 'doc_id', doc, 'selector', 'filename' );
+```
+
+- Parameter/Result
+  - Parameter
+    - 'db'
+      - name of database
+    - 'doc_id'
+      - document id
+    - doc
+      - document to be uploaded
+    - 'selector'
+      - element selector `<input type="file" id="file1"/>`, for example "#file1" in this case.
+    - 'filename'
+      - name of attached file(doesn't have to be real file name)
+
+  - Result
+    - Success
+      - `{ status: true, result: { _id: 'doc_id', _rev: 'doc_rev', name: 'xxxx', .. , _attachments: { filename: { .. } } } }`
+    - Failed
+      - `{ status: false, error: (error_reason) }`
+
 ### Read file from document
 
 ```
