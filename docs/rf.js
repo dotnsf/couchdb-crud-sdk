@@ -93,21 +93,16 @@ async function get_docs( db ){
       + '<button class="btn btn-danger" onClick="delete_db(\'' + db + '\')">Delete DB</button>'
       + '<button class="btn btn-primary" onClick="create_doc(\'' + db + '\')">Create Doc</button>'
       + '</th>'
-      + '</tr>';
+      + '</tr>'
       + '</thead>'
-      + '<tbody>'
+      + '<tbody>';
     for( var i = 0; i < docs.length; i ++ ){
       docs_list += '<tr>'
-        + '<td>' + ( 'filename' in docs[i] ? docs[i].filename : '' ) + '</td>'
-        + '<td>' + docs[i].subject + '</td>'
-        + '<td>' + docs[i].username + '</td>'
-        + '<td>' + timestamp2yyyymmdd( docs[i].timestamp ) + '</td>'
-        //+ '<td><a href="#" onClick="get_doc(\'' + db + '\',\'' + docs[i]._id + '\')">' + ( 'filename' in docs[i] ? docs[i].filename : '' ) + '</a></td>'
-        //+ '<td><a href="#" onClick="get_doc(\'' + db + '\',\'' + docs[i]._id + '\')">' + docs[i].subject + '</a></td>'
-        //+ '<td><a href="#" onClick="get_doc(\'' + db + '\',\'' + docs[i]._id + '\')">' + docs[i].username + '</a></td>'
-        //+ '<td><a href="#" onClick="get_doc(\'' + db + '\',\'' + docs[i]._id + '\')">' + timestamp2yyyymmdd( docs[i].timestamp ) + '</a></td>'
+        + '<td><a href="#" onClick="get_doc(\'' + db + '\',\'' + docs[i]._id + '\')">' + ( 'filename' in docs[i] ? docs[i].filename : '' ) + '</a></td>'
+        + '<td><a href="#" onClick="get_doc(\'' + db + '\',\'' + docs[i]._id + '\')">' + docs[i].subject + '</a></td>'
+        + '<td><a href="#" onClick="get_doc(\'' + db + '\',\'' + docs[i]._id + '\')">' + docs[i].username + '</a></td>'
+        + '<td><a href="#" onClick="get_doc(\'' + db + '\',\'' + docs[i]._id + '\')">' + timestamp2yyyymmdd( docs[i].timestamp ) + '</a></td>'
         + '<td>'
-        + '<button class="btn btn-success" onClick="get_doc(\'' + db + '\', \'' + docs[i]._id + '\')">Show</button>'
         + '<button class="btn btn-warning" onClick="edit_doc(\'' + db + '\',\'' + docs[i]._id + '\')">Edit</button>'
         + '<button class="btn btn-danger" onClick="delete_doc(\'' + db + '\',\'' + docs[i]._id + '\',\'' + docs[i]._rev + '\')">Delete</button>'
         + '</td>'
@@ -119,12 +114,6 @@ async function get_docs( db ){
     $('#docs_list').html( docs_list );
 
     //. #14
-    /* 一見正しそうな画面になるが、ソート不可などの問題がある
-    $.extend( $.fn.dataTable.defaults, {
-      language: {
-        url: '//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Japanese.json'
-      }
-    });
     $('#docs_table').DataTable({
       language: {
         url: '//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Japanese.json'
@@ -135,7 +124,6 @@ async function get_docs( db ){
         searchable: false
       }]
     });
-    */
   }
 }
 
