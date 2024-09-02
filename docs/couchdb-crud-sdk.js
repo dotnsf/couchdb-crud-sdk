@@ -409,9 +409,85 @@ class CouchDB_CRUD_SDK{
         r = await self.readDoc( db, doc_id );
         if( r && r.status ){
           if( selector ){
-            var file = document.querySelector( selector ).files[0];
+            var sel = document.querySelector( selector );
+            if( sel && sel.files && sel.files.length >= 0 && sel.files[0] ){
+              var file = sel.files[0];
+              var name = filename ? filename : file.name;
+              var doc = r.result;
+              if( doc ){
+                var reader = new FileReader();
+                reader.addEventListener( 'load', function( e ){
+                  //console.log( reader.result );  //. data:image/png;base64,xxxxxxx..
+                  var data = reader.result;
+                  var tmp = data.split( ',' );
+                  if( tmp.length == 2 ){
+                    var base64 = tmp[1];
+                    data = tmp[0];
+                    tmp = data.split( ';' );
+                    if( tmp.length == 2 ){
+                      data = tmp[0];
+                      tmp = data.split( ':' );
+                      if( tmp.length == 2 ){
+                        if( !doc._attachments ){
+                          doc._attachments = {};
+                        }
+                        doc._attachments[name] = {};
+                        doc._attachments[name].content_type = tmp[1];
+                        doc._attachments[name].data = base64;
+    
+                        self.updateDoc( db, doc_id, doc ).then( function( r ){
+                          resolve( r );
+                        });
+                      }else{
+                        r = { status: false, error: 'file data(format) would be something wrong.' };
+                        resolve( r );
+                      }
+                    }else{
+                      r = { status: false, error: 'file data(format) would be something wrong.' };
+                      resolve( r );
+                    }
+                  }else{
+                    r = { status: false, error: 'file data(format) would be something wrong.' };
+                    resolve( r );
+                  }
+                });
+                reader.readAsDataURL( file );
+              }else{
+                r = { status: false, error: 'no document found for _id = ' + doc_id };
+                resolve( r );
+              }
+            }else{
+              r = { status: false, error: 'no element found for selector ="' + selector + '".' };
+              resolve( r );
+            }
+          }else{
+            r = { status: false, error: 'no selector specified.' };
+            resolve( r );
+          }
+        }else{
+          r = { status: false, error: r.error };
+          resolve( r );
+        }
+      }catch( e ){
+        r = { status: false, error: e };
+        console.log( e );
+        resolve( r );
+      }
+    });
+  }
+
+  //. #10 : updateDoc + saveFile を１回のリビジョン変更で実施するための関数
+  saveDocAndFile = async function( db, doc_id, doc, selector, filename ){
+    return new Promise( async ( resolve, reject ) => {
+      var self = this;
+      var r = null;
+      try{
+        if( selector ){
+          var sel = document.querySelector( selector );
+          if( sel && sel.files && sel.files.length >= 0 && sel.files[0] ){
+            var file = sel.files[0];
             var name = filename ? filename : file.name;
-            var doc = r.result;
+            //var doc = r.result;
             if( doc ){
               var reader = new FileReader();
               reader.addEventListener( 'load', function( e ){
@@ -455,11 +531,11 @@ class CouchDB_CRUD_SDK{
               resolve( r );
             }
           }else{
-            r = { status: false, error: 'no selector specified.' };
+            r = { status: false, error: 'no element found for selector = "' + selector + '".' };
             resolve( r );
           }
         }else{
-          r = { status: false, error: r.error };
+          r = { status: false, error: 'no selector specified.' };
           resolve( r );
         }
       }catch( e ){
@@ -470,17 +546,21 @@ class CouchDB_CRUD_SDK{
     });
   }
 
-  //. #10 : updateDoc + saveFile を１回のリビジョン変更で実施するための関数
-  saveDocAndFile = async function( db, doc_id, doc, selector, filename ){
+  //. #16 : #10 を saveDoc として初回保存時にも対応する
+  //.       ついでに document.querySelector( selector ).files[0] 時に発生する可能性のあるエラーにも対応する
+  saveDoc = async function( db, doc_id, doc, selector, filename ){
     return new Promise( async ( resolve, reject ) => {
       var self = this;
       var r = null;
       try{
+        var name = null;
         if( selector ){
-          var file = document.querySelector( selector ).files[0];
-          var name = filename ? filename : file.name;
-          //var doc = r.result;
-          if( doc ){
+          //. 添付ファイルあり
+          var sel = document.querySelector( selector );
+          if( sel && sel.files && sel.files.length >= 0 && sel.files[0] ){
+            var file = sel.files[0];
+            name = filename ? filename : file.name;
+
             var reader = new FileReader();
             reader.addEventListener( 'load', function( e ){
               //console.log( reader.result );  //. data:image/png;base64,xxxxxxx..
@@ -501,9 +581,17 @@ class CouchDB_CRUD_SDK{
                     doc._attachments[name].content_type = tmp[1];
                     doc._attachments[name].data = base64;
 
-                    self.updateDoc( db, doc_id, doc ).then( function( r ){
-                      resolve( r );
-                    });
+                    if( doc_id ){
+                      //. 既存文書＆添付ファイルあり
+                      self.updateDoc( db, doc_id, doc ).then( function( r ){
+                        resolve( r );
+                      });
+                    }else{
+                      //. 新規文書＆添付ファイルあり
+                      self.createDoc( db, doc ).then( function( r ){
+                        resolve( r );
+                      });
+                    }
                   }else{
                     r = { status: false, error: 'file data(format) would be something wrong.' };
                     resolve( r );
@@ -519,12 +607,34 @@ class CouchDB_CRUD_SDK{
             });
             reader.readAsDataURL( file );
           }else{
-            r = { status: false, error: 'no document found for _id = ' + doc_id };
-            resolve( r );
+            //. 添付ファイルなし
+            //r = { status: false, error: 'no elements found for selector ="' + selector + '".' };
+            //resolve( r );
+            if( doc_id ){
+              //. 既存文書＆添付ファイルなし
+              self.updateDoc( db, doc_id, doc ).then( function( r ){
+                resolve( r );
+              });
+            }else{
+              //. 新規文書＆添付ファイルなし
+              self.createDoc( db, doc ).then( function( r ){
+                resolve( r );
+              });
+            }
           }
         }else{
-          r = { status: false, error: 'no selector specified.' };
-          resolve( r );
+          //. 添付ファイルなし
+          if( doc_id ){
+            //. 既存文書＆添付ファイルなし
+            self.updateDoc( db, doc_id, doc ).then( function( r ){
+              resolve( r );
+            });
+          }else{
+            //. 新規文書＆添付ファイルなし
+            self.createDoc( db, doc ).then( function( r ){
+              resolve( r );
+            });
+          }
         }
       }catch( e ){
         r = { status: false, error: e };
@@ -605,18 +715,24 @@ class CouchDB_CRUD_SDK{
   readTextLocalFile = async function( selector, code ){
     return new Promise( async ( resolve, reject ) => {
       var r = null;
-      var file = document.querySelector( selector ).files[0];
-      var name = file.name;
+      var sel = document.querySelector( selector );
+      if( sel && sel.files && sel.files.length >= 0 && sel.files[0] ){
+        var file = sel.files[0];
+        var name = file.name;
   
-      var reader = new FileReader();
-      reader.addEventListener( 'load', function( e ){
-        //console.log( reader.result );  //. data:application/json;base64,xxxxx...
-        var data = reader.result;
-        console.log( {data} );
-        r = { status: true, result: { name: name, text: data } };
+        var reader = new FileReader();
+        reader.addEventListener( 'load', function( e ){
+          //console.log( reader.result );  //. data:application/json;base64,xxxxx...
+          var data = reader.result;
+          console.log( {data} );
+          r = { status: true, result: { name: name, text: data } };
+          resolve( r );
+        });
+        reader.readAsText( file, code );
+      }else{
+        r = { status: false, error: 'no element found for selecor ="' + selector + '".' };
         resolve( r );
-      });
-      reader.readAsText( file, code );
+      }
     });
   }
 }

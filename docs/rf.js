@@ -98,11 +98,11 @@ async function get_docs( db ){
       + '<tbody>'
     for( var i = 0; i < docs.length; i ++ ){
       docs_list += '<tr>'
-        + '<td>' + docs[i].filename + '</td>'
+        + '<td>' + ( 'filename' in docs[i] ? docs[i].filename : '' ) + '</td>'
         + '<td>' + docs[i].subject + '</td>'
         + '<td>' + docs[i].username + '</td>'
         + '<td>' + timestamp2yyyymmdd( docs[i].timestamp ) + '</td>'
-        //+ '<td><a href="#" onClick="get_doc(\'' + db + '\',\'' + docs[i]._id + '\')">' + docs[i].filename + '</a></td>'
+        //+ '<td><a href="#" onClick="get_doc(\'' + db + '\',\'' + docs[i]._id + '\')">' + ( 'filename' in docs[i] ? docs[i].filename : '' ) + '</a></td>'
         //+ '<td><a href="#" onClick="get_doc(\'' + db + '\',\'' + docs[i]._id + '\')">' + docs[i].subject + '</a></td>'
         //+ '<td><a href="#" onClick="get_doc(\'' + db + '\',\'' + docs[i]._id + '\')">' + docs[i].username + '</a></td>'
         //+ '<td><a href="#" onClick="get_doc(\'' + db + '\',\'' + docs[i]._id + '\')">' + timestamp2yyyymmdd( docs[i].timestamp ) + '</a></td>'
@@ -200,7 +200,7 @@ $(function(){
     var r = await cdb.readDoc( db, doc_id, doc_rev );
     if( r && r.status ){
       var doc = r.result;
-      $('#view_filename').val( doc.filename );
+      $('#view_filename').val( ( 'filename' in doc ? doc.filename : '' ) );
       $('#view_subject').val( doc.subject );
       $('#view_username').val( doc.username );
       $('#view_body').val( doc.body );
@@ -231,73 +231,46 @@ $(function(){
 async function save_doc(){
   var db = $('#edit_db').val();
   var doc_id = $('#edit_doc_id').val();
+  var doc = null;
 
   if( !doc_id ){
-    var doc = { type: 'file' };
+    doc = { type: 'file' };
+  }else{
+    var r = await cdb.readDoc( db, doc_id );
+    if( r && r.status ){
+      doc = r.result;
+    }
+  }
+
+  if( doc ){
     doc.subject = $('#edit_subject').val();
     doc.username = $('#edit_username').val();
     doc.body = $('#edit_body').val();
     doc.timestamp = ( new Date() ).getTime();
 
     var file_name = null;
+    var selector = '#edit_attachment';
     try{
-      var file = document.querySelector( '#edit_attachment' ).files[0];
-      file_name = file.name;
+      var sel = document.querySelector( selector );
+      if( sel && sel.files && sel.files.length >= 0 ){
+        var file = sel.files[0];
+        file_name = file.name;
+        if( !( 'filename' in doc ) || !doc.filename ){
+          doc.filename = file_name;
+        }
+      }
     }catch( e ){
     }
 
-    if( file_name ){
-      doc.filename = file_name;
-    }
-
-    cdb.createDoc( db, doc ).then( async function( r1 ){
-      if( r1 && r1.status ){
-        if( file_name ){
-          doc_id = r1.result.id;
-          var r2 = await cdb.saveFile( db, doc_id, '#edit_attachment', doc.filename );
-        }
-      }
-
+    //. #16
+    cdb.saveDoc( db, doc_id, doc, '#edit_attachment', doc.filename ).then( async function( r1 ){
       $('#editModal').modal( 'hide' );
       get_docs( db );
     });
   }else{
-    var r = await cdb.readDoc( db, doc_id );
-    if( r && r.status ){
-      //. #10 現在はまずファイル以外の要素を更新し、そのあとでファイルを更新している
-      //. これを一回の更新でできないか？
-
-      //. まずファイル添付があるかどうかを調べて、なければファイル以外の更新を１回実施すればよい
-      //. ファイル添付があった場合は、これを１回で行うような別 SDK が必要？
-
-      var doc = r.result;
-      doc.subject = $('#edit_subject').val();
-      doc.username = $('#edit_username').val();
-      doc.body = $('#edit_body').val();
-      doc.timestamp = ( new Date() ).getTime();
-
-      var file_name = null;
-      try{
-        var file = document.querySelector( '#edit_attachment' ).files[0];
-        file_name = file.name;
-      }catch( e ){
-      }
-
-      //. #10
-      if( file_name ){
-        //. cdb.saveFile( db, doc_id, '#edit_attachment', doc.filename ) と
-        //. cdb.updateDoc( db, doc_id, doc ) を１回で行う SDK
-        cdb.saveDocAndFile( db, doc_id, doc, '#edit_attachment', doc.filename ).then( async function( r1 ){
-          $('#editModal').modal( 'hide' );
-          get_docs( db );
-        });
-      }else{
-        cdb.updateDoc( db, doc_id, doc ).then( async function( r1 ){
-          $('#editModal').modal( 'hide' );
-          get_docs( db );
-        });
-      }
-    }
+    console.log( 'Failed to retrieve document for id = ' + doc_id + '.' );
+    $('#editModal').modal( 'hide' );
+    get_docs( db );
   }
 }
 

@@ -28,8 +28,12 @@ a {
   width: 200px; 
 }
 
+#empty_row {
+  width: 20px; 
+}
+
 #docs_list {
-  width: calc(100% - 200px); 
+  width: calc(100% - 220px); 
 }
 
 /* #11
