@@ -3,12 +3,17 @@
 
 ## Pre-requisite 
 
+- Prepare CoubhDB/Cloudant server.
+
+  - If you would use Docker, use following command to create CouchDB server:
+    - `$ docker run -d --name couchdb -p 5984:5984 -e COUCHDB_USER=user -e COUCHDB_PASSWORD=pass couchdb`
+      - Login ID: user, Login PASSWORD: pass
+    - Go to `http://localhost:5984/_utils` for CouchDB dashboard with browser
+
 - Your CouchDB/Cloudant has to be ..
 
   - CORS enabled
-
     - In CouchDB/Cloudant dashboard, you need to enabled CORS and your domain have to be in Origin Domains:
-
     - ![CORS enabled](https://dotnsf.github.io/couchdb-crud-sdk/img_00.png)
 
   - and accessible by username and password(Basic Authentication enabled).

@@ -23,7 +23,7 @@ class CouchDB_CRUD_SDK{
   }
 
   //. Login
-  login = async function( db ){
+  login = async function(){
     return new Promise( async ( resolve, reject ) => {
       var r = null;
       try{
