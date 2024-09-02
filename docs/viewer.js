@@ -75,14 +75,17 @@ async function get_docs( db ){
   var r = await cdb.readAllDocs( db );
   if( r && r.status ){
     var docs = r.result;
-    var docs_list = '<table class="table">'
+    var docs_list = '<table id="docs_table" class="table table-bordered">'
+      + '<thead>'
       + '<tr>'
       + '<td>_id</td>'
       + '<td>'
       + '<button class="btn btn-danger" onClick="delete_db(\'' + db + '\')">Delete DB</button>'
       + '<button class="btn btn-primary" onClick="create_doc(\'' + db + '\')">Create Doc</button>'
       + '</td>'
-      + '</tr>';
+      + '</tr>'
+      + '</thead>'
+      + '<tbody>';
     for( var i = 0; i < docs.length; i ++ ){
       docs_list += '<tr>'
         + '<td>' + docs[i]._id + '</td>'
@@ -94,8 +97,20 @@ async function get_docs( db ){
         + '</tr>';
       //console.log( docs[i] );
     }
-    docs_list += '</table>';
+    docs_list += '</tbody></table>';
     $('#docs_list').html( docs_list );
+
+    //. #14
+    $('#docs_table').DataTable({
+      language: {
+        url: '//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Japanese.json'
+      },
+      columnDefs: [{
+        targets: [ 1 ],
+        orderable: false,
+        searchable: false
+      }]
+    });
   }
 }
 
