@@ -116,7 +116,7 @@ async function get_docs( db ){
     //. #14
     $('#docs_table').DataTable({
       language: {
-        url: '//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Japanese.json'
+        url: 'https://cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Japanese.json'   //. always https
       },
       columnDefs: [{
         targets: [ 4 ],
@@ -203,12 +203,12 @@ $(function(){
         var url = await get_file_url( db, doc_id, doc_rev, doc.filename );
         if( url ){
           var iframe = '<iframe src="' + url + '" width="300" height="100"></iframe>';
-          //$('#attachment_preview').html( iframe );  //. 画像／PDF 以外うまくいかないので無効化
+          $('#attachment_preview').html( iframe );
+        }else{
+          $('#attachment_preview').html( '(Preview unavailable for this contents)' );
         }
       }else{
         $('#view_attachment').html( '' );
-
-        //. #11
         $('#attachment_preview').html( '' );
       }
     }
@@ -267,8 +267,11 @@ async function get_file_url( db, doc_id, doc_rev, filename ){
   var url = null;
   var r = await cdb.readFile( db, doc_id, doc_rev, filename );
   if( r && r.status ){
-    var blob = r.result;
-    url = URL.createObjectURL( blob );
+    var blob = r.result;  //. blob.type に Content-Type
+    //console.log( {blob} );
+    if( isPreviewable( blob.type ) ){
+      url = URL.createObjectURL( blob );
+    }
   }
 
   return url;
@@ -309,6 +312,21 @@ function timestamp2yyyymmdd( t ){
     + ':' + ( ss < 10 ? '0' : '' ) + ss;
 
   return yyyymmdd;
+}
+
+function isPreviewable( type ){
+  type = type.toLowerCase();
+  var r = false;
+  var previewables = [
+    'application/pdf' 
+  ];
+
+  r = ( type.startsWith( 'image/' )
+    || type.startsWith( 'audio/' ) 
+    || type.startsWith( 'video/' ) 
+    || type.indexOf( previewables ) > -1 );
+
+  return r;
 }
 
 $(function(){
