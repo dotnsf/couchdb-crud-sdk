@@ -103,7 +103,7 @@ async function get_docs( db ){
     //. #14
     $('#docs_table').DataTable({
       language: {
-        url: '//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Japanese.json'
+        url: 'https://cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Japanese.json'   //. always https
       },
       columnDefs: [{
         targets: [ 1 ],
