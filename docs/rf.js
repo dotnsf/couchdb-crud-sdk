@@ -68,8 +68,14 @@ async function create_doc( db ){
   $('#edit_username').val( '' );
   $('#edit_body').val( '' );
 
-  //$('#edit_attachment_td').html( '<input type="file" class="btn form-control" id="edit_attachment"/>' );
-  $('#edit_attachment_td').html( '<input type="file" id="edit_attachment"/>' );
+  //$('#edit_attachment_td').html( '<input type="file" id="edit_attachment"/>' );
+  //. #12
+  var edit_attachment_td = '<div id="div_attachment"><label><input type="file" id="edit_attachment"/>ファイル添付</label><span id="edit_attachment_filename">選択されていません</span></div>';
+  $('#edit_attachment_td').html( edit_attachment_td );
+  $('#div_attachment #edit_attachment').on( 'change', function(){
+    var file = $(this).prop( 'files' )[0];
+    $(this).closest( '#div_attachment' ).find( '#edit_attachment_filename' ).text( file.name );
+  });
 
   $('#editModal').modal();
 }
@@ -166,8 +172,14 @@ async function edit_doc( db, doc_id ){
     $('#edit_username').val( doc.username );
     $('#edit_body').val( doc.body );
 
-    //$('#edit_attachment_td').html( '<input type="file" class="btn form-control" id="edit_attachment"/>' );
-    $('#edit_attachment_td').html( '<input type="file" id="edit_attachment"/>' );
+    //$('#edit_attachment_td').html( '<input type="file" id="edit_attachment"/>' );
+    //. #12
+    var edit_attachment_td = '<div id="div_attachment"><label><input type="file" id="edit_attachment"/>ファイル添付</label><span id="edit_attachment_filename">選択されていません</span></div>';
+    $('#edit_attachment_td').html( edit_attachment_td );
+    $('#div_attachment #edit_attachment').on( 'change', function(){
+      var file = $(this).prop( 'files' )[0];
+      $(this).closest( '#div_attachment' ).find( '#edit_attachment_filename' ).text( file.name );
+    });
 
     $('#editModal').modal();
   }
